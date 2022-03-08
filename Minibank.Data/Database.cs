@@ -8,10 +8,10 @@ namespace Minibank.Data
     {
         private readonly Dictionary<string, int> _currencyDict = new Dictionary<string, int>()
         {
-            {"usd",83},
-            {"eur",93},
-            {"gbp", 113 },
-            {"aud", 63}, 
+            {"usd", 83},
+            {"eur", 93},
+            {"gbp", 113},
+            {"aud", 63},
             {"try", 6},
             {"chf", 90},
             {"cad", 68},

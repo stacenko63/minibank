@@ -11,7 +11,7 @@ namespace Minibank.Core
             _database = database; 
         }
         
-        public double CurrencyConvert(int value, string currencyCode)
+        public double GetValueInOtherCurrency(int value, string currencyCode)
         {
             if (value < 0) throw new UserFriendlyException("The sum must not be a negative number!");
             int currencyRate = _database.Get(currencyCode);

@@ -27,12 +27,16 @@ namespace Minibank.Data
         }
         // public int Get(string currencyCode)
         // {
-        //     return _currencyDict.ContainsKey(currencyCode) ? _currencyDict[currencyCode] : -1;
+        //     if (!_currencyDict.ContainsKey(currencyCode.ToLower())) 
+        //         throw new UserFriendlyException("The code of the specified currency was not found in our database!"); 
+        //     return _currencyDict[currencyCode.ToLower()];
         // }
 
         public int Get(string currencyCode)
         {
-            return _currencyDict.ContainsKey(currencyCode) ? rnd.Next(1,100): -1;
+            if (!_currencyDict.ContainsKey(currencyCode.ToLower()))
+                throw new UserFriendlyException("The code of the specified currency was not found in our database!"); 
+            return rnd.Next(1,100);
         }
     }
 }

@@ -22,7 +22,8 @@ namespace Minibank.Web.Middlewares
             }
             catch (UserFriendlyException exception)
             {
-                await httpContext.Response.WriteAsync(exception.What());
+                httpContext.Response.StatusCode = 400;
+                await httpContext.Response.WriteAsJsonAsync(exception.Message);
             }
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -21,6 +22,7 @@ namespace Minibank.Web.Middlewares
             }
             catch (Exception exception)
             {
+                httpContext.Response.StatusCode = 500;
                 await httpContext.Response.WriteAsJsonAsync(new {Message = "Внутренняя ошибка сервера!"});
             }
         }

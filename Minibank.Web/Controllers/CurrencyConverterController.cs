@@ -19,9 +19,9 @@ namespace Minibank.Web.Controllers
          public double Get(int value, string currencyCode)
          {
              //if (value < 0) throw new Exception("Сумма в рублях не должна быть меньше 0!");
-             var result = _converter.GetValueInOtherCurrency(value, currencyCode);
+             //var result = _converter.GetValueInOtherCurrency(value, currencyCode);
              //if (result == -1) throw new Exception("Указанный вами код валюты отсутствует в нашей базе данных!");
-             return result;
+             return _converter.GetValueInOtherCurrency(value, currencyCode);
          }
 
 

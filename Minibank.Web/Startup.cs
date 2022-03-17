@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Minibank.Core;
+using Minibank.Core.Domains.BankAccounts.Services;
+using Minibank.Core.Domains.MoneyTransferHistory.Services;
+using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domains.Users.Services;
 using Minibank.Data;
 using Minibank.Web.Middlewares;
 
@@ -26,8 +31,7 @@ namespace Minibank.Web
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -35,22 +39,21 @@ namespace Minibank.Web
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Minibank.Web", Version = "v1"});
             });
-
-            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
             services.AddScoped<IDatabase, Database>();
-        }
+            services.AddData(Configuration);
+            services.AddCore();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        }
+        
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
             
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<FriendlyExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
             
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minibank.Web v1"));
             }

@@ -9,6 +9,5 @@ namespace Minibank.Core.Domains.Users.Services
         IEnumerable<User> GetAllUsers(); 
         void UpdateUser(User user);
         void DeleteUser(string id);
-        //void SetActive(string id); 
     }
 }

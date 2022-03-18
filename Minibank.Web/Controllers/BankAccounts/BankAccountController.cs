@@ -22,19 +22,19 @@ namespace Minibank.Web.Controllers.BankAccounts
             _bankAccountService.CreateBankAccount(userId, currencyCode, startBalance);
         }
 
-        [HttpPatch("/{id}/close")]
+        [HttpPatch("/Id/Close")]
         public void CloseAccount(string id)
         {
             _bankAccountService.CloseAccount(id);
         }
 
-        [HttpGet("/commision")]
+        [HttpGet("/Commision")]
         public double GetCommision(double value, string fromAccountId, string toAccountId)
         {
             return _bankAccountService.GetCommision(value, fromAccountId, toAccountId);
         }
         
-        [HttpPut("/money_transfer")]
+        [HttpPut("/MoneyTransfer")]
         public void MakeMoneyTransfer(double value, string fromAccountId, string toAccountId)
         {
             _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId);

@@ -1,6 +1,6 @@
-namespace Minibank.Core.Domains.Users
+namespace Minibank.Web.Controllers.Users.Dto
 {
-    public class User
+    public class UserDtoGet
     {
         public string Id { get; set; }
         public string Login { get; set; }

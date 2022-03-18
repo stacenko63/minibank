@@ -20,69 +20,59 @@ namespace Minibank.Web.Controllers.Users
              _userService = userService;
          }
     
-         [HttpGet("get")]
-         public IEnumerable<UserDto> GetAll()
+         [HttpGet("Get")]
+         public IEnumerable<UserDtoGet> GetAllUsers()
          {
              return _userService.GetAllUsers()
-                 .Select(it => new UserDto
+                 .Select(it => new UserDtoGet
                  {
                      Id = it.Id,
                      Login = it.Login,
                      Email = it.Email,
-                     HasBankAccounts = it.HasBankAccounts
                  });
          }
          
          
          
-         [HttpGet("{id}")]
-         public UserDto Get(string id)
+         [HttpGet("Id")]
+         public UserDtoGet GetUser(string id)
          {
              var model = _userService.GetUser(id);
-             return new UserDto
+             return new UserDtoGet
              {
                  Id = model.Id,
                  Login = model.Login,
                  Email = model.Email,
-                 HasBankAccounts = model.HasBankAccounts
              };
          
          }
 
          [HttpPost]
-         public void Create(UserDto model) 
+         public void CreateUser(UserDtoCreateOrPut model) 
          {
              _userService.CreateUser(new User
              {
-                 Id = model.Id,
                  Login = model.Login,
                  Email = model.Email
              });
          }
          
-         [HttpPut("{id}")]
-         public void Update(string id, UserDto userDto)
+         [HttpPut("Id")]
+         public void UpdateUser(string id, UserDtoCreateOrPut userDtoGet)
          {
              _userService.UpdateUser(new User
              {
-                 Id = userDto.Id,
-                 Login = userDto.Login,
-                 Email = userDto.Email,
-                 HasBankAccounts = userDto.HasBankAccounts
+                 Id = id,
+                 Login = userDtoGet.Login,
+                 Email = userDtoGet.Email,
              });
          }
          
-         [HttpDelete("{id}")]
-         public void Delete(string id)
+         [HttpDelete("Id")]
+         public void DeleteUser(string id)
          {
              _userService.DeleteUser(id);
          }
 
-         // [HttpPatch("/{id}/activate")]
-         // public void SetActive(string id)
-         // {
-         //     //_userService.SetActive(id);
-         // }
-        
-    }
+     }
 }

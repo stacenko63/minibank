@@ -13,3 +13,6 @@ C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\obj\Debug\net5.0\Minibank
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\obj\Debug\net5.0\Minibank.Data.dll
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\obj\Debug\net5.0\ref\Minibank.Data.dll
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\obj\Debug\net5.0\Minibank.Data.pdb
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\bin\Debug\net5.0\Minibank.Data.runtimeconfig.json
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\bin\Debug\net5.0\Minibank.Data.runtimeconfig.dev.json
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Data\obj\Debug\net5.0\Minibank.Data.genruntimeconfig.cache

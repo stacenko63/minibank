@@ -21,11 +21,19 @@ namespace Minibank.Data
 
         public double Get(string currencyCode)
         {
-            if (currencyCode.ToUpper() == "RUB") return 1;
+            if (currencyCode.ToUpper() == "RUB")
+            {
+                return 1;
+            }
             var response = _httpClient.GetFromJsonAsync<CourseResponse>("daily_json.js").GetAwaiter().GetResult();
-            if (response.Valute.ContainsKey(currencyCode.ToLower())) return response.Valute[currencyCode.ToLower()].Value;
+            if (response.Valute.ContainsKey(currencyCode.ToLower()))
+            {
+                return response.Valute[currencyCode.ToLower()].Value;
+            }
             if (!response.Valute.ContainsKey(currencyCode.ToUpper()))
+            {
                 throw new ValidationException("The code of the specified currency was not found in our database!");
+            }
             return response.Valute[currencyCode.ToUpper()].Value;
             
         }

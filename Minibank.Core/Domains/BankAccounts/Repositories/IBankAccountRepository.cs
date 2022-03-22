@@ -2,14 +2,14 @@ namespace Minibank.Core.Domains.BankAccounts.Repositories
 {
     public interface IBankAccountRepository
     {
-        public void CreateBankAccount(string userId, string currency, double startBalance);
+        public void CreateBankAccount(int userId, string currency, double startBalance);
 
-        public BankAccount GetAccount(string id);
+        public BankAccount GetAccount(int id);
         
-        public void CloseAccount(string id);
+        public void CloseAccount(int id);
 
-        public bool HasBankAccounts(string userId);
+        public bool HasBankAccounts(int userId);
 
-        public void MakeMoneyTransfer(double valueFrom, double valueTo, string fromAccountId, string toAccountId);
+        public void MakeMoneyTransfer(double valueFrom, double valueTo, int fromAccountId, int toAccountId);
     }
 }

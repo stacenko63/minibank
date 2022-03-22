@@ -17,18 +17,19 @@ namespace Minibank.Data.BankAccounts.Repositories
         private readonly IUserRepository _userRepository;
 
         private readonly IMoneyTransferHistoryService _moneyTransferHistory;
-        
+
+        private static int _id = 1;
         public BankAccountRepository(IUserRepository userRepository, ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory)
         {
             _userRepository = userRepository;
             _moneyTransferHistory = moneyTransferHistory;
         }
 
-        public void CreateBankAccount(string userId, string currencyCode, double startBalance)
+        public void CreateBankAccount(int userId, string currencyCode, double startBalance)
         {
             var entity = new BankAccountDBModel
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = _id++,
                 UserId = userId,
                 Balance = startBalance,
                 Currency = currencyCode,
@@ -39,10 +40,13 @@ namespace Minibank.Data.BankAccounts.Repositories
             _bankAccountDbModels.Add(entity);
         }
 
-        public BankAccount GetAccount(string accountId)
+        public BankAccount GetAccount(int accountId)
         {
             var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == accountId);
-            if (entity == null) throw new ValidationException("This accountId is not found in base!");
+            if (entity == null)
+            {
+                throw new ValidationException("This accountId is not found in base!");
+            }
             return new BankAccount
             {
                 Id = entity.Id,
@@ -55,24 +59,32 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public void CloseAccount(string id)
+        public void CloseAccount(int id)
         {
             var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == id);
-            if (entity == null) throw new ValidationException("This BankAccount Id is not fount in base!");
+            if (entity == null)
+            {
+                throw new ValidationException("This BankAccount Id is not fount in base!");
+            }
             if (entity.Balance != 0)
+            {
                 throw new ValidationException("Before closing BankAccount your balance must be 0!");
-            if (!entity.IsOpen) throw new ValidationException("This account has already closed!");
+            }
+            if (!entity.IsOpen)
+            {
+                throw new ValidationException("This account has already closed!");
+            }
             entity.IsOpen = false;
             entity.CloseAccountDate = DateTime.Now;
         }
         
-        public void MakeMoneyTransfer(double valueFrom, double valueTo, string fromAccountId, string toAccountId)
+        public void MakeMoneyTransfer(double valueFrom, double valueTo, int fromAccountId, int toAccountId)
         {
             _bankAccountDbModels.FirstOrDefault(it => it.Id == fromAccountId).Balance -= valueFrom;
             _bankAccountDbModels.FirstOrDefault(it => it.Id == toAccountId).Balance += valueTo;
         }
 
-        public bool HasBankAccounts(string userId)
+        public bool HasBankAccounts(int userId)
         {
             return _bankAccountDbModels.FirstOrDefault(it => it.UserId == userId) != null;
         }

@@ -34,8 +34,8 @@ namespace Minibank.Web.Controllers.Users
          
          
          
-         [HttpGet("Id")]
-         public UserDtoGet GetUser(string id)
+         [HttpGet("{id}")]
+         public UserDtoGet GetUser(int id)
          {
              var model = _userService.GetUser(id);
              return new UserDtoGet
@@ -48,7 +48,7 @@ namespace Minibank.Web.Controllers.Users
          }
 
          [HttpPost]
-         public void CreateUser(UserDtoCreateOrPut model) 
+         public void CreateUser(UserDtoPostOrPut model) 
          {
              _userService.CreateUser(new User
              {
@@ -57,8 +57,8 @@ namespace Minibank.Web.Controllers.Users
              });
          }
          
-         [HttpPut("Id")]
-         public void UpdateUser(string id, UserDtoCreateOrPut userDtoGet)
+         [HttpPut("{id}")]
+         public void UpdateUser(int id, UserDtoPostOrPut userDtoGet)
          {
              _userService.UpdateUser(new User
              {
@@ -68,8 +68,8 @@ namespace Minibank.Web.Controllers.Users
              });
          }
          
-         [HttpDelete("Id")]
-         public void DeleteUser(string id)
+         [HttpDelete("{id}")]
+         public void DeleteUser(int id)
          {
              _userService.DeleteUser(id);
          }

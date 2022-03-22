@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Minibank.Core.Domains.BankAccounts;
 using Minibank.Core.Domains.BankAccounts.Services;
 using Minibank.Web.Controllers.BankAccounts.Dto;
 
@@ -17,27 +18,27 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
         
         [HttpPost]
-        public void Create(string userId, string currencyCode, double startBalance)
+        public void Create(int userId, string currencyCode, double startBalance)
         {
             _bankAccountService.CreateBankAccount(userId, currencyCode, startBalance);
         }
 
         [HttpPatch("/Id/Close")]
-        public void CloseAccount(string id)
+        public void CloseAccount(int id)
         {
             _bankAccountService.CloseAccount(id);
         }
 
         [HttpGet("/Commision")]
-        public double GetCommision(double value, string fromAccountId, string toAccountId)
+        public double GetCommision(double value, int fromAccountId, int toAccountId)
         {
             return _bankAccountService.GetCommision(value, fromAccountId, toAccountId);
         }
         
-        [HttpPut("/MoneyTransfer")]
-        public void MakeMoneyTransfer(double value, string fromAccountId, string toAccountId)
+        [HttpPost("/MoneyTransfer")]
+        public void MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
         {
-            _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId);
+            _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId); 
         }
     }
 }

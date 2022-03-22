@@ -2,13 +2,13 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 {
     public interface IBankAccountService
     {
-        public void CreateBankAccount(string userId, string currencyCode, double startBalance);
+        public void CreateBankAccount(int userId, string currencyCode, double startBalance);
 
-        public void CloseAccount(string id);
+        public void CloseAccount(int id);
         
-        public double GetCommision(double value, string fromAccountId, string toAccountId);
+        public double GetCommision(double value, int fromAccountId, int toAccountId);
         
-        public void MakeMoneyTransfer(double value, string fromAccountId, string toAccountId);
+        public void MakeMoneyTransfer(double value, int fromAccountId, int toAccountId);
 
     }
 }

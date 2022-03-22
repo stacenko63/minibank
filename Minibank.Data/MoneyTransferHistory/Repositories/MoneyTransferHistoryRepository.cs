@@ -9,11 +9,12 @@ namespace Minibank.Data.MoneyTransferHistory.Repositories
     {
         private static List<MoneyTransferHistoryDBModel> _moneyTransferHistoryDBModels = new List<MoneyTransferHistoryDBModel>();
 
-        public void AddHistory(double value, string currencyCode, string fromAccountId, string toAccountId)
+        private static int _id = 1;
+        public void AddHistory(double value, string currencyCode, int fromAccountId, int toAccountId)
         {
             var entity = new MoneyTransferHistoryDBModel
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = _id++,
                 Value = value,
                 CurrencyCode = currencyCode,
                 FromAccountId = fromAccountId,

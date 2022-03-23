@@ -59,29 +59,20 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public void CloseAccount(int id)
+        public void UpdateBankAccount(BankAccount bankAccount)
         {
-            var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == id);
+            var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == bankAccount.Id);
             if (entity == null)
             {
-                throw new ValidationException("This BankAccount Id is not fount in base!");
+                throw new ValidationException("You can't update this bank account, because this id is not found in base!");
             }
-            if (entity.Balance != 0)
-            {
-                throw new ValidationException("Before closing BankAccount your balance must be 0!");
-            }
-            if (!entity.IsOpen)
-            {
-                throw new ValidationException("This account has already closed!");
-            }
-            entity.IsOpen = false;
-            entity.CloseAccountDate = DateTime.Now;
-        }
-        
-        public void MakeMoneyTransfer(double valueFrom, double valueTo, int fromAccountId, int toAccountId)
-        {
-            _bankAccountDbModels.FirstOrDefault(it => it.Id == fromAccountId).Balance -= valueFrom;
-            _bankAccountDbModels.FirstOrDefault(it => it.Id == toAccountId).Balance += valueTo;
+            entity.Id = bankAccount.Id;
+            entity.UserId = bankAccount.UserId;
+            entity.Balance = bankAccount.Balance;
+            entity.Currency = bankAccount.Currency;
+            entity.IsOpen = bankAccount.IsOpen;
+            entity.OpenAccountDate = bankAccount.OpenAccountDate;
+            entity.CloseAccountDate = bankAccount.CloseAccountDate;
         }
 
         public bool HasBankAccounts(int userId)

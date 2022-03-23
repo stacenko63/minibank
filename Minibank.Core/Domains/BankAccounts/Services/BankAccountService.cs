@@ -47,9 +47,25 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             _bankAccountRepository.CreateBankAccount(userId, correctCurrencyCode, startBalance);
         }
 
+        public void UpdateBankAccount(BankAccount bankAccount)
+        {
+            _bankAccountRepository.UpdateBankAccount(bankAccount);
+        }
+
         public void CloseAccount(int id)
         {
-            _bankAccountRepository.CloseAccount(id);
+            var entity = _bankAccountRepository.GetAccount(id);
+            if (entity.Balance != 0)
+            {
+                throw new ValidationException("Before closing BankAccount your balance must be 0!");
+            }
+            if (!entity.IsOpen)
+            {
+                throw new ValidationException("This account has already closed!");
+            }
+            entity.IsOpen = false;
+            entity.CloseAccountDate = DateTime.Now;
+            _bankAccountRepository.UpdateBankAccount(entity);
         }
 
         private double GetCommisionValue(double value, int userId1, int userId2)
@@ -92,7 +108,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 bankAccount1.Currency, bankAccount2.Currency);
             var valueTo =  _converter.GetValueInOtherCurrency(value, bankAccount1.Currency, bankAccount2.Currency) - commision;
             _moneyTransferHistory.AddHistory(value, bankAccount1.Currency, bankAccount1.Id, bankAccount2.Id);
-            _bankAccountRepository.MakeMoneyTransfer(value, valueTo, fromAccountId, toAccountId);
+            bankAccount1.Balance -= value;
+            bankAccount2.Balance += valueTo;
+            _bankAccountRepository.UpdateBankAccount(bankAccount1);
+            _bankAccountRepository.UpdateBankAccount(bankAccount2);
         }
     }
 }

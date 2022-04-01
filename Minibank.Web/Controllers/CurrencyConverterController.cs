@@ -5,7 +5,7 @@ using Minibank.Core;
 namespace Minibank.Web.Controllers
 {
     [ApiController]
-    [Route("controller")]
+    [Route("Converter")]
     public class CurrencyConverterController : ControllerBase
     {
         private readonly ICurrencyConverter _converter;
@@ -16,12 +16,9 @@ namespace Minibank.Web.Controllers
         }
 
          [HttpGet]
-         public double Get(int value, string currencyCode)
+         public double Get(double amount, string fromCurrency, string toCurrency)
          {
-             //if (value < 0) throw new Exception("Сумма в рублях не должна быть меньше 0!");
-             //var result = _converter.GetValueInOtherCurrency(value, currencyCode);
-             //if (result == -1) throw new Exception("Указанный вами код валюты отсутствует в нашей базе данных!");
-             return _converter.GetValueInOtherCurrency(value, currencyCode);
+             return _converter.GetValueInOtherCurrency(amount, fromCurrency,toCurrency);
          }
 
 

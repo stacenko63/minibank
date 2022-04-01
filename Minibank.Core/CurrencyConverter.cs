@@ -11,10 +11,14 @@ namespace Minibank.Core
             _database = database; 
         }
         
-        public double GetValueInOtherCurrency(int value, string currencyCode)
+        public double GetValueInOtherCurrency(double amount, string fromCurrency, string toCurrency)
         {
-            if (value < 0) throw new UserFriendlyException("The sum must not be a negative number!");
-            return (double) value / _database.Get(currencyCode); 
+            if (amount < 0)
+            {
+                throw new ValidationException("The sum must not be a negative number!");
+            }
+            return amount * _database.Get(fromCurrency) / _database.Get(toCurrency);
+            
         }
 
 

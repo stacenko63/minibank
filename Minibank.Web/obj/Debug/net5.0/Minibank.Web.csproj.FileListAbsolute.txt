@@ -31,3 +31,10 @@ C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\obj\Debug\net5.0\Minibank.
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\obj\Debug\net5.0\ref\Minibank.Web.dll
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\obj\Debug\net5.0\Minibank.Web.pdb
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\obj\Debug\net5.0\Minibank.Web.genruntimeconfig.cache
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Npgsql.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll

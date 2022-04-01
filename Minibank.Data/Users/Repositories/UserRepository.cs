@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minibank.Core;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
@@ -9,18 +12,21 @@ namespace Minibank.Data.Users.Repositories
 {
     public class UserRepository :IUserRepository
     {
-        private static List<UserDBModel> _userDbModels = new List<UserDBModel>();
 
-        private static int _id = 1;
-
-        public User GetUser(int id)
+        private readonly MiniBankContext _context;
+        public UserRepository(MiniBankContext context)
         {
-            var entity = _userDbModels.FirstOrDefault(i => i.Id == id);
-            if (entity == null)
-            {
-                throw new ValidationException("User with this id is not found!");
-            }
-            return new User
+            _context = context;
+        }
+
+        public async Task<User> GetUser(int id)
+        { 
+            var entity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+           if (entity == null)
+           {
+               throw new ValidationException("User with this id is not found!");
+           }
+           return new User
             {
                 Id = entity.Id,
                 Login = entity.Login,
@@ -28,29 +34,32 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public void CreateUser(string login, string email)
+        public async Task CreateUser(string login, string email)
         {
-            _userDbModels.Add(new UserDBModel
+            await _context.Users.AddAsync(new UserDBModel
             {
-                Id = _id++,
                 Login = login,
                 Email = email,
             });
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<IEnumerable<User>> GetAllUsers()
         {
-            return _userDbModels.Select(it => new User
+            _context.Users.RemoveRange(_context.Users);
+            _context.BankAccounts.RemoveRange(_context.BankAccounts);
+            _context.MoneyTransferHistories.RemoveRange(_context.MoneyTransferHistories);
+            await _context.SaveChangesAsync();
+            return await _context.Users.AsNoTracking().Select(it => new User
             {
                 Id = it.Id,
                 Login = it.Login,
                 Email = it.Email,
-            });
+            }).ToArrayAsync();
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateUser(User user)
         {
-            var entity = _userDbModels.FirstOrDefault(it => it.Id == user.Id);
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == user.Id);
             if (entity == null)
             {
                 throw new ValidationException("You can't update this user, because this id is not found in base!");
@@ -59,14 +68,14 @@ namespace Minibank.Data.Users.Repositories
             entity.Email = user.Email;
         }
 
-        public void DeleteUser(int id)
+        public async Task DeleteUser(int id)
         {
-            var entity = _userDbModels.FirstOrDefault(it => it.Id == id);
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
             if (entity == null)
             {
                 throw new ValidationException("User with this id is not in base!");
             }
-            _userDbModels.Remove(entity);
+            _context.Users.Remove(entity);
         }
     }
 }

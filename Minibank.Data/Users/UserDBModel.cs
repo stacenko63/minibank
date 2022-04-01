@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Minibank.Data.Users
 {
@@ -13,6 +14,5 @@ namespace Minibank.Data.Users
         public string Login { get; set; }
         [Column("email")]
         public string Email { get; set; }
-        
     }
 }

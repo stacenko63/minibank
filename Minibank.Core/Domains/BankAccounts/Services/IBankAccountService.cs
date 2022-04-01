@@ -1,16 +1,17 @@
+using System.Threading.Tasks;
+
 namespace Minibank.Core.Domains.BankAccounts.Services
 {
     public interface IBankAccountService
     {
-        public void CreateBankAccount(int userId, string currencyCode, double startBalance);
+        public Task CreateBankAccount(int userId, string currencyCode, double startBalance);
 
-        public void CloseAccount(int id);
+        public Task CloseAccount(int id);
         
-        public double GetCommision(double value, int fromAccountId, int toAccountId);
+        public Task<double> GetCommission(double value, int fromAccountId, int toAccountId);
         
-        public void MakeMoneyTransfer(double value, int fromAccountId, int toAccountId);
-
-        public void UpdateBankAccount(BankAccount bankAccount);
+        public Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId);
+        public Task UpdateBankAccount(BankAccount bankAccount);
 
     }
 }

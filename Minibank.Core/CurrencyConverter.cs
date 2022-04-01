@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Minibank.Core
 {
@@ -11,14 +12,15 @@ namespace Minibank.Core
             _database = database; 
         }
         
-        public double GetValueInOtherCurrency(double amount, string fromCurrency, string toCurrency)
+        public async Task<double> GetValueInOtherCurrency(double amount, string fromCurrency, string toCurrency)
         {
             if (amount < 0)
             {
                 throw new ValidationException("The sum must not be a negative number!");
             }
-            return amount * _database.Get(fromCurrency) / _database.Get(toCurrency);
-            
+            var fromCurrencyValue = await _database.Get(fromCurrency); 
+            var toCurrencyValue = await _database.Get(toCurrency);
+            return amount * fromCurrencyValue / toCurrencyValue;
         }
 
 

@@ -45,10 +45,6 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsers()
         {
-            _context.Users.RemoveRange(_context.Users);
-            _context.BankAccounts.RemoveRange(_context.BankAccounts);
-            _context.MoneyTransferHistories.RemoveRange(_context.MoneyTransferHistories);
-            await _context.SaveChangesAsync();
             return await _context.Users.AsNoTracking().Select(it => new User
             {
                 Id = it.Id,
@@ -77,5 +73,17 @@ namespace Minibank.Data.Users.Repositories
             }
             _context.Users.Remove(entity);
         }
+
+        public async Task<bool> ContainsLogin(string login)
+        {
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Login == login);
+            return entity != null; 
+        } 
+        
+        public async Task<bool> ContainsEmail(string email)
+        {
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Email == email);
+            return entity != null; 
+        } 
     }
 }

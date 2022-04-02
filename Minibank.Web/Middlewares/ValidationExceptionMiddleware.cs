@@ -29,8 +29,8 @@ namespace Minibank.Web.Middlewares
             catch (FluentValidation.ValidationException exception)
             {
                 httpContext.Response.StatusCode = 400;
-                var errors = exception.Errors.Select(x => x.ErrorMessage);
-                await httpContext.Response.WriteAsJsonAsync(new {Error = string.Join(Environment.NewLine, errors)});
+                var errors = exception.Errors.Select(x => x.ErrorMessage).ToList();
+                await httpContext.Response.WriteAsJsonAsync(errors[0]);
             }
         }
 

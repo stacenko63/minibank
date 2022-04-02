@@ -10,5 +10,7 @@ namespace Minibank.Core.Domains.Users.Repositories
         Task<IEnumerable<User>> GetAllUsers(); 
         Task UpdateUser(User user);
         Task DeleteUser(int id);
+        Task<bool> ContainsLogin(string login); 
+        Task<bool> ContainsEmail(string email); 
     }
 }

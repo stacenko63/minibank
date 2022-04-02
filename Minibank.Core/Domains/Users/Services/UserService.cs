@@ -44,6 +44,7 @@ namespace Minibank.Core.Domains.Users.Services
 
         public async Task UpdateUser(User user)
         {
+            await _userValidator.ValidateAndThrowAsync(user);
             await _userRepository.UpdateUser(user);
             await _unitOfWork.SaveChangesAsync();
         }

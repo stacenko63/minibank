@@ -9,7 +9,15 @@
     &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccounts.BankAccountValidatorTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=77b59728_002Dcd98_002D4eee_002D9814_002D6bedf1c3b951/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UnitTest1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6d4f6255_002Da3ea_002D46ad_002D8d49_002D52b2d8ce4f67/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="BankAccountServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccountServiceTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccounts.BankAccountValidatorTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.UserServiceTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.Users.UserValidatorTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=77b59728_002Dcd98_002D4eee_002D9814_002D6bedf1c3b951/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="UnitTest1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.UserServiceTests&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccountServiceTests&lt;/TestId&gt;&#xD;

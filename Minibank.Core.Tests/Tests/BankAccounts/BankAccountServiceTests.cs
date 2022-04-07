@@ -52,6 +52,29 @@ namespace Minibank.Core.Tests
             await _bankAccountService.UpdateBankAccount(bankAccount);
             _fakeBankAccountRepository.Verify(repository => repository.UpdateBankAccount(bankAccount), Times.Once);
         }
+        
+        [Fact]
+        public async Task GetBankAccount_BankAccountWithNotInBase_ShouldThrowValidationException()
+        {
+            _fakeBankAccountRepository.Setup(repository => repository.GetAccount(4).Result).Throws<Exception>();
+            await Assert.ThrowsAsync<Exception>(() => _bankAccountService.GetAccount(4));
+        }
+        
+        [Fact]
+        public async Task GetBankAccount_SuccessPath_ShouldGetBankAccountFromBase()
+        {
+            _fakeBankAccountRepository.Setup(repository => repository.GetAccount(4).Result).Returns(new 
+                BankAccount{Balance = 1000, Currency = "RUB", IsOpen = true, UserId = 2, Id = 3, CloseAccountDate = DateTime.MinValue, 
+                    OpenAccountDate = DateTime.MinValue});
+            var result = await _bankAccountService.GetAccount(4);
+            Assert.True((int) result.Balance == 1000);
+            Assert.True(result.Currency == "RUB");
+            Assert.True(result.IsOpen);
+            Assert.True(result.UserId == 2);
+            Assert.True(result.Id == 3);
+            Assert.True(result.CloseAccountDate == DateTime.MinValue);
+            Assert.True(result.OpenAccountDate == DateTime.MinValue);
+        }
 
         [Fact]
         public async Task CreateAndUpdateBankAccount_CheckValidatorWork_ShouldThrowValidationException()

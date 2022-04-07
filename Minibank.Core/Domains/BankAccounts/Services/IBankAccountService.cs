@@ -13,5 +13,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         public Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId);
         public Task UpdateBankAccount(BankAccount bankAccount);
 
+        public Task<BankAccount> GetAccount(int id);
+
     }
 }

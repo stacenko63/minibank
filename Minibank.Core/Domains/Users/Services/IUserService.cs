@@ -10,5 +10,6 @@ namespace Minibank.Core.Domains.Users.Services
         Task<IEnumerable<User>> GetAllUsers(); 
         Task UpdateUser(User user);
         Task DeleteUser(int id);
+        
     }
 }

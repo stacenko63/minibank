@@ -45,6 +45,7 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsers()
         {
+            await _context.SaveChangesAsync();
             return await _context.Users.AsNoTracking().Select(it => new User
             {
                 Id = it.Id,

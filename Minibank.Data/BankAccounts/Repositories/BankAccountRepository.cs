@@ -65,10 +65,15 @@ namespace Minibank.Data.BankAccounts.Repositories
             {
                 throw new ValidationException("You can't update this bank account, because this id is not found in base!");
             }
-            entity.Id = bankAccount.Id;
-            entity.UserId = bankAccount.UserId;
+            if (entity.UserId != bankAccount.UserId)
+            {
+                throw new ValidationException("You can't update userId in bank account!");
+            }
+            if (entity.Currency != bankAccount.Currency)
+            {
+                throw new ValidationException("You can't update bank account's currency!");
+            }
             entity.Balance = bankAccount.Balance;
-            entity.Currency = bankAccount.Currency;
             entity.IsOpen = bankAccount.IsOpen;
             entity.OpenAccountDate = bankAccount.OpenAccountDate;
             entity.CloseAccountDate = bankAccount.CloseAccountDate;

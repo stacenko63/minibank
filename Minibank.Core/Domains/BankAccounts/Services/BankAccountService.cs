@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using FluentValidation;
 using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.MoneyTransferHistory.Services;
 using Minibank.Core.Domains.Users.Repositories;
@@ -17,39 +18,39 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         private readonly ICurrencyConverter _converter;
 
         private readonly IUnitOfWork _unitOfWork;
+
+        private readonly IValidator<BankAccount> _bankAccountValidator;
         public BankAccountService(IBankAccountRepository bankAccountRepository, IUserRepository userRepository, 
-            ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory, IUnitOfWork unitOfWork)
+            ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory, IUnitOfWork unitOfWork, IValidator<BankAccount> bankAccountValidator)
         {
             _bankAccountRepository = bankAccountRepository;
             _userRepository = userRepository;
             _converter = converter;
             _moneyTransferHistory = moneyTransferHistory;
             _unitOfWork = unitOfWork;
+            _bankAccountValidator = bankAccountValidator;
         }
+        
+        
 
         public async Task CreateBankAccount(int userId, string currencyCode, double startBalance)
         {
-            if (startBalance < 0)
-            {
-                throw new ValidationException("StartBalance must be more than 0 or equal 0!");
-            }
+            await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount
+                {UserId = userId, Currency = currencyCode, Balance = startBalance});
             await _userRepository.GetUser(userId);
-            if (currencyCode == null)
-            {
-                throw new ValidationException("This currency is unavailable at the moment!");
-            }
-            string correctCurrencyCode = Char.ToString(currencyCode[0]).ToUpper() + 
-                                         currencyCode.Substring(1,currencyCode.Length-1).ToLower();
-            if (!Enum.IsDefined(typeof(PermittedCurrencies), correctCurrencyCode))
-            {
-                throw new ValidationException("This currency is unavailable at the moment!");
-            }
-            await _bankAccountRepository.CreateBankAccount(userId, correctCurrencyCode, startBalance);
+            await _bankAccountRepository.CreateBankAccount(userId, currencyCode, startBalance);
             await _unitOfWork.SaveChangesAsync();
+        }
+        
+        public async Task<BankAccount> GetAccount(int id)
+        {
+            return await _bankAccountRepository.GetAccount(id);
         }
 
         public async Task UpdateBankAccount(BankAccount bankAccount)
-        {
+        { 
+            await _bankAccountValidator.ValidateAndThrowAsync(bankAccount);
+            await _userRepository.GetUser(bankAccount.UserId);
            await _bankAccountRepository.UpdateBankAccount(bankAccount);
            await _unitOfWork.SaveChangesAsync();
         }
@@ -97,6 +98,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         
         public async Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
         {
+            if (fromAccountId == toAccountId)
+            {
+                throw new ValidationException("You can't transfer money to the same account!");
+            }
             if (value <= 0)
             {
                 throw new ValidationException("value must be more, than 0!");

@@ -53,7 +53,7 @@ namespace Minibank.Core.Domains.Users.Services
         {
             if (_bankAccountRepository.HasBankAccounts(id).Result)
             {
-                throw new ValidationException("You can't delete user which have one or more BanAccounts");
+                throw new ValidationException("You can't delete user which have one or more BankAccounts");
             }
             await _userRepository.DeleteUser(id);
             await _unitOfWork.SaveChangesAsync();

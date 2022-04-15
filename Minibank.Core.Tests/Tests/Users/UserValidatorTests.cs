@@ -64,7 +64,7 @@ namespace Minibank.Core.Tests.Users
         [InlineData(123, 256)]
         public async Task UserValidator_LoginWithIncorrectFormat_ShouldThrowValidationException(int begin, int end)
         {
-            string email = "a@mail.ru";
+            const string email = "a@mail.ru";
             for (int i = begin; i < end; i++)
             {
                 var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
@@ -85,7 +85,7 @@ namespace Minibank.Core.Tests.Users
         [InlineData(97,123)]
         public async Task UserValidator_SuccessPathsLogin_ShouldBeCompleteSuccessfully(int begin, int end)
         {
-            string email = "a@mail.ru";
+            const string email = "a@mail.ru";
             for (int i = begin; i < end; i++)
             {
                 await _userValidator.ValidateAndThrowAsync(new User {Login = (char) i + "GG", Email = email});
@@ -124,7 +124,7 @@ namespace Minibank.Core.Tests.Users
         [InlineData(123, 256)]
         public async Task UserValidator_EmailWithIncorrectFormat_ShouldThrowValidationException(int begin, int end)
         {
-            string login = "viktor";
+            const string login = "viktor";
             for (int i = begin; i < end; i++)
             {
                 var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
@@ -158,7 +158,7 @@ namespace Minibank.Core.Tests.Users
         [Fact]
         public async Task UserValidator_SuccessPath_ShouldBeCompleteSuccessfully()
         {
-            string login = "viktor", email = "a@mail.ru";
+            const string login = "viktor", email = "a@mail.ru";
             _fakeUserRepository.Setup(repository => repository.ContainsLogin(login).Result).Returns(false);
             _fakeUserRepository.Setup(repository => repository.ContainsEmail(email).Result).Returns(false);
             await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = email});
@@ -170,7 +170,7 @@ namespace Minibank.Core.Tests.Users
         [InlineData(97,123)]
         public async Task UserValidator_SuccessPathsEmail_ShouldBeCompleteSuccessfully(int begin, int end)
         {
-            string login = "viktor";
+            const string login = "viktor";
             for (int i = begin; i < end; i++)
             {
                 await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = (char) i + "a@mail.ru"});

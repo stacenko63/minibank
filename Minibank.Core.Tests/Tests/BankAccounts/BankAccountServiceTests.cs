@@ -48,7 +48,7 @@ namespace Minibank.Core.Tests
         [Fact]
         public async Task CreateBankAccount_CheckValidatorWork_ShouldCheckValidatorCall()
         {
-            int id = 3;
+            const int id = 3;
             _fakeUserRepository.Setup(repository => repository.GetUser(id).Result).Returns(new User {Id = id});
             await _bankAccountService.CreateBankAccount(id, "RUB", 0);
             Assert.True(_bankAccountValidator.IsCalled);
@@ -89,8 +89,8 @@ namespace Minibank.Core.Tests
         [Fact]
         public async Task UpdateBankAccount_CheckValidatorWork_ShouldCheckValidatorCall()
         {
-            int id = 3;
-            string currency = "RUB";
+            const int id = 3;
+            const string currency = "RUB";
             _fakeBankAccountRepository.Setup(repository => repository.GetAccount(id).Result).
                 Returns(new BankAccount {Id = id, Currency = currency});
             await _bankAccountService.UpdateBankAccount(new BankAccount
@@ -217,7 +217,7 @@ namespace Minibank.Core.Tests
         [Fact]
         public async Task GetCommission_WithIncorrectCommission_ShouldCorrect()
         {
-            int userId1 = 20, userId2 = 19, bankAccountId1 = 4, bankAccountId2 = 5, bankAccountId3 = 6;
+            const int userId1 = 20, userId2 = 19, bankAccountId1 = 4, bankAccountId2 = 5, bankAccountId3 = 6;
             _fakeBankAccountRepository.Setup(repository => repository.GetAccount(bankAccountId1).Result)
                 .Returns(new BankAccount{UserId = userId1, IsOpen = true});
             _fakeBankAccountRepository.Setup(repository => repository.GetAccount(bankAccountId2).Result)

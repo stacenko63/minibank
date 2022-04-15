@@ -37,8 +37,8 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount
                 {UserId = userId, Currency = currencyCode, Balance = startBalance});
-            await _userRepository.GetUser(userId);
-            await _bankAccountRepository.CreateBankAccount(userId, currencyCode, startBalance);
+            var user = await _userRepository.GetUser(userId);
+            await _bankAccountRepository.CreateBankAccount(user.Id, currencyCode, startBalance);
             await _unitOfWork.SaveChangesAsync();
         }
         
@@ -50,8 +50,16 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         public async Task UpdateBankAccount(BankAccount bankAccount)
         { 
             await _bankAccountValidator.ValidateAndThrowAsync(bankAccount);
-            await _userRepository.GetUser(bankAccount.UserId);
-           await _bankAccountRepository.UpdateBankAccount(bankAccount);
+            var account = await _bankAccountRepository.GetAccount(bankAccount.Id);
+            if (account.UserId != bankAccount.UserId)
+            {
+                throw new ValidationException(Messages.UpdateUserId);
+            }
+            if (account.Currency != bankAccount.Currency)
+            {
+                throw new ValidationException(Messages.UpdateCurrency);
+            }
+            await _bankAccountRepository.UpdateBankAccount(account);
            await _unitOfWork.SaveChangesAsync();
         }
 
@@ -60,11 +68,11 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             var entity = await _bankAccountRepository.GetAccount(id);
             if (entity.Balance != 0)
             {
-                throw new ValidationException("Before closing BankAccount your balance must be 0!");
+                throw new ValidationException(Messages.CloseAccountWithNotZeroBalance);
             }
             if (!entity.IsOpen)
             {
-                throw new ValidationException("This account has already closed!");
+                throw new ValidationException(Messages.CloseAccountThatAreAlreadyClosed);
             }
             entity.IsOpen = false;
             entity.CloseAccountDate = DateTime.Now;
@@ -72,51 +80,47 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        private async Task<double> GetCommissionValue(double value, int userId1, int userId2)
+        private double GetCommissionValue(double value, int userId1, int userId2)
         {
-            return await Task.Run(() =>
-            {
-                double number = userId1 == userId2 ? 0 : Math.Floor(Math.Round(value * 0.02, 2));
-                return number;
-            });
+            return userId1 == userId2 ? 0 : Math.Floor(Math.Round(value * 0.02, 2));
         }
         
         public async Task<double> GetCommission(double value, int fromAccountId, int toAccountId)
         {
             if (value <= 0)
             {
-                throw new ValidationException("value must be more, than 0!");
+                throw new ValidationException(Messages.ZeroOrNegativeValue);
             }
             var bankAccount1 = await _bankAccountRepository.GetAccount(fromAccountId);
             var bankAccount2 = await _bankAccountRepository.GetAccount(toAccountId);
             if (!bankAccount1.IsOpen || !bankAccount2.IsOpen)
             {
-                throw new ValidationException("You can't get commission, because one of this accounts is closed!");
+                throw new ValidationException(Messages.GetCommissionForClosedAccount);
             }
-            return await GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId);
+            return GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId);
         }
         
         public async Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
         {
             if (fromAccountId == toAccountId)
             {
-                throw new ValidationException("You can't transfer money to the same account!");
+                throw new ValidationException(Messages.TransferMoneyToTheSameAccount);
             }
             if (value <= 0)
             {
-                throw new ValidationException("value must be more, than 0!");
+                throw new ValidationException(Messages.ZeroOrNegativeValue);
             }
             var bankAccount1 = await _bankAccountRepository.GetAccount(fromAccountId);
             var bankAccount2 = await _bankAccountRepository.GetAccount(toAccountId);
             if (bankAccount1.Balance < value)
             {
-                throw new ValidationException("You don't have enough funds on your balance!");
+                throw new ValidationException(Messages.NotEnoughBalance);
             }
             if (!bankAccount1.IsOpen || !bankAccount2.IsOpen)
             {
-                throw new ValidationException("You can't get commission, because one of this accounts is closed!");
+                throw new ValidationException(Messages.MoneyTransferBetweenClosedAccounts);
             }
-            double commission = await _converter.GetValueInOtherCurrency(await GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId), 
+            double commission = await _converter.GetValueInOtherCurrency(GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId), 
                 bankAccount1.Currency, bankAccount2.Currency);
             var valueTo =  await _converter.GetValueInOtherCurrency(value, bankAccount1.Currency, bankAccount2.Currency) - commission;
             await _moneyTransferHistory.AddHistory(value, bankAccount1.Currency, bankAccount1.Id, bankAccount2.Id);

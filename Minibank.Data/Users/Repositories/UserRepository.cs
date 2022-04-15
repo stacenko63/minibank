@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minibank.Core;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domains.Users.Services;
 
 namespace Minibank.Data.Users.Repositories
 {
@@ -24,7 +25,7 @@ namespace Minibank.Data.Users.Repositories
             var entity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
            if (entity == null)
            {
-               throw new ValidationException("User with this id is not found!");
+               throw new ValidationException(Messages.NonExistentUser);
            }
            return new User
             {
@@ -56,22 +57,14 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task UpdateUser(User user)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == user.Id);
-            if (entity == null)
-            {
-                throw new ValidationException("You can't update this user, because this id is not found in base!");
-            }
+            var entity = await _context.Users.FirstAsync(it => it.Id == user.Id);
             entity.Login = user.Login;
             entity.Email = user.Email;
         }
 
         public async Task DeleteUser(int id)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
-            if (entity == null)
-            {
-                throw new ValidationException("User with this id is not in base!");
-            }
+            var entity = await _context.Users.FirstAsync(it => it.Id == id);
             _context.Users.Remove(entity);
         }
 

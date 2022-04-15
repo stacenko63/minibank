@@ -33,6 +33,14 @@ namespace Minibank.Core.Domains.Users.Services
         public async Task CreateUser(User user)
         {
             await _userValidator.ValidateAndThrowAsync(user);
+            if (_userRepository.ContainsLogin(user.Login).Result)
+            {
+                throw new ValidationException(Messages.LoginIsAlreadyUsed);
+            }
+            if (_userRepository.ContainsEmail(user.Email).Result)
+            {
+                throw new ValidationException(Messages.EmailIsAlreadyUsed);
+            }
             await _userRepository.CreateUser(user.Login, user.Email);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -45,7 +53,16 @@ namespace Minibank.Core.Domains.Users.Services
         public async Task UpdateUser(User user)
         {
             await _userValidator.ValidateAndThrowAsync(user);
-            await _userRepository.UpdateUser(user);
+            if (_userRepository.ContainsLogin(user.Login).Result)
+            {
+                throw new ValidationException(Messages.LoginIsAlreadyUsed);
+            }
+            if (_userRepository.ContainsEmail(user.Email).Result)
+            {
+                throw new ValidationException(Messages.EmailIsAlreadyUsed);
+            }
+            var updateUser = await _userRepository.GetUser(user.Id);
+            await _userRepository.UpdateUser(updateUser);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -53,9 +70,10 @@ namespace Minibank.Core.Domains.Users.Services
         {
             if (_bankAccountRepository.HasBankAccounts(id).Result)
             {
-                throw new ValidationException("You can't delete user which have one or more BankAccounts");
+                throw new ValidationException(Messages.DeleteUserWithBankAccounts);
             }
-            await _userRepository.DeleteUser(id);
+            var user = await _userRepository.GetUser(id);
+            await _userRepository.DeleteUser(user.Id);
             await _unitOfWork.SaveChangesAsync();
         }
 

@@ -1,31 +1,75 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation;
+using FluentValidation.Internal;
+using FluentValidation.Results;
 using Minibank.Core.Domains.Users.Repositories;
 
 namespace Minibank.Core.Domains.Users.Validators
 {
     public class UserValidator : AbstractValidator<User>
     {
-        public UserValidator(IUserRepository userRepository)
+        public UserValidator()
         {
-            RuleFor(x => x.Login).NotEmpty().WithMessage("Login must not be empty!");
-            RuleFor(x => x.Login).Must(it => !it.Contains(" ")).WithMessage("Login must not have some spaces!");
+            RuleFor(x => x.Login).NotEmpty().WithMessage(Messages.EmptyLogin);
+            RuleFor(x => x.Login).Must(it => !it.Contains(" ")).WithMessage(Messages.LoginWithSpaces);
             RuleFor(x => x.Login.Length).LessThanOrEqualTo(20)
-                .WithMessage("Login's length must not be more than 20 symbols!");
-            RuleFor(x => x.Login).Matches(@"^[a-zA-Z0-9]+$").WithMessage("Login is not in correct format!");
-            RuleFor(x => x).Must((x) => !userRepository.ContainsLogin(x.Login).Result)
-                .WithMessage("This login is already used!");
-            RuleFor(x => x.Email).NotEmpty().WithMessage("Email must not be empty!");
-            RuleFor(x => x.Email).Must(it => !it.Contains(" ")).WithMessage("Email must not have some spaces!");
-            RuleFor(x => x.Email).Matches(@"^[a-zA-Z0-9@.]+$").Must(it => it.EndsWith("@mail.ru"))
-                 .WithMessage("Email is not in correct format!");
+                .WithMessage(Messages.LoginWithLengthMoreThan20);
+            RuleFor(x => x.Login).Matches(@"^[a-zA-Z0-9]+$").WithMessage(Messages.LoginFormat);
+            RuleFor(x => x.Email).NotEmpty().WithMessage(Messages.EmptyEmail);
+            RuleFor(x => x.Email).Must(it => !it.Contains(" ")).WithMessage(Messages.EmailWithSpaces);
+            RuleFor(x => x.Email).Matches(@"^[a-zA-Z0-9@.]+$")
+                 .WithMessage(Messages.EmailFormat);
+            RuleFor(x => x.Email).Must(it => it.EndsWith("@mail.ru")).WithMessage(Messages.EmailNotMailRu);
+        }
+    }
 
+    public class UserValidate : IValidator<User>
+    {
+        public bool IsCalled { get; set; }
 
-            RuleFor(x => x).Must((x) => !userRepository.ContainsEmail(x.Email).Result)
-                .WithMessage("This email is already used!");
+        public UserValidate()
+        {
+            IsCalled = false;
+        }
+        public ValidationResult Validate(IValidationContext context)
+        {
+            IsCalled = true;
+            return new ValidationResult();
+        }
+
+        public async Task<ValidationResult> ValidateAsync(IValidationContext context, CancellationToken cancellation = new CancellationToken())
+        {
+            IsCalled = true;
+            return new ValidationResult();
+        }
+
+        public IValidatorDescriptor CreateDescriptor()
+        {
+            return new ValidatorDescriptor<User>(new List<IValidationRule>());
+        }
+
+        public bool CanValidateInstancesOfType(Type type)
+        {
+            return true;
+        }
+
+        public ValidationResult Validate(User instance)
+        {
+            IsCalled = true;
+            return new ValidationResult();
+
+        }
+
+        public async Task<ValidationResult> ValidateAsync(User instance, CancellationToken cancellation = new CancellationToken())
+        {
+            IsCalled = true;
+            return new ValidationResult();
         }
     }
 }

@@ -30,10 +30,9 @@ namespace Minibank.Web.Middlewares
             catch (FluentValidation.ValidationException exception)
             {
                 httpContext.Response.StatusCode = 400;
-                var errors = exception.Errors.Select(x => x.ErrorMessage).ToList();
-                await httpContext.Response.WriteAsJsonAsync(errors);
+                await httpContext.Response.WriteAsJsonAsync(exception.Errors.Select(x => x.ErrorMessage).ToList());
             }
-            catch (NullReferenceException exception)
+            catch (NullReferenceException)
             {
                 httpContext.Response.StatusCode = 400;
                 await httpContext.Response.WriteAsJsonAsync("You shouldn't use null values!");

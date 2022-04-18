@@ -36,8 +36,13 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         public async Task CreateBankAccount(int userId, string currencyCode, double startBalance)
         {
             await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount
-                {UserId = userId, Currency = currencyCode, Balance = startBalance});
+            {
+                UserId = userId, 
+                Currency = currencyCode, 
+                Balance = startBalance
+            });
             var user = await _userRepository.GetUser(userId);
+            
             await _bankAccountRepository.CreateBankAccount(user.Id, currencyCode, startBalance);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -51,14 +56,17 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         { 
             await _bankAccountValidator.ValidateAndThrowAsync(bankAccount);
             var account = await _bankAccountRepository.GetAccount(bankAccount.Id);
+            
             if (account.UserId != bankAccount.UserId)
             {
                 throw new ValidationException(Messages.UpdateUserId);
             }
+            
             if (account.Currency != bankAccount.Currency)
             {
                 throw new ValidationException(Messages.UpdateCurrency);
             }
+            
             await _bankAccountRepository.UpdateBankAccount(account);
            await _unitOfWork.SaveChangesAsync();
         }
@@ -66,16 +74,20 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         public async Task CloseAccount(int id)
         {
             var entity = await _bankAccountRepository.GetAccount(id);
+            
             if (entity.Balance != 0)
             {
                 throw new ValidationException(Messages.CloseAccountWithNotZeroBalance);
             }
+            
             if (!entity.IsOpen)
             {
                 throw new ValidationException(Messages.CloseAccountThatAreAlreadyClosed);
             }
+            
             entity.IsOpen = false;
             entity.CloseAccountDate = DateTime.Now;
+           
             await _bankAccountRepository.UpdateBankAccount(entity);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -91,12 +103,15 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             {
                 throw new ValidationException(Messages.ZeroOrNegativeValue);
             }
+            
             var bankAccount1 = await _bankAccountRepository.GetAccount(fromAccountId);
             var bankAccount2 = await _bankAccountRepository.GetAccount(toAccountId);
+            
             if (!bankAccount1.IsOpen || !bankAccount2.IsOpen)
             {
                 throw new ValidationException(Messages.GetCommissionForClosedAccount);
             }
+            
             return GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId);
         }
         
@@ -106,26 +121,37 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             {
                 throw new ValidationException(Messages.TransferMoneyToTheSameAccount);
             }
+            
             if (value <= 0)
             {
                 throw new ValidationException(Messages.ZeroOrNegativeValue);
             }
+            
             var bankAccount1 = await _bankAccountRepository.GetAccount(fromAccountId);
             var bankAccount2 = await _bankAccountRepository.GetAccount(toAccountId);
+            
             if (bankAccount1.Balance < value)
             {
                 throw new ValidationException(Messages.NotEnoughBalance);
             }
+            
             if (!bankAccount1.IsOpen || !bankAccount2.IsOpen)
             {
                 throw new ValidationException(Messages.MoneyTransferBetweenClosedAccounts);
             }
-            double commission = await _converter.GetValueInOtherCurrency(GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId), 
+            
+            double commission = await _converter.GetValueInOtherCurrency(
+                GetCommissionValue(value, bankAccount1.UserId, bankAccount2.UserId), 
                 bankAccount1.Currency, bankAccount2.Currency);
-            var valueTo =  await _converter.GetValueInOtherCurrency(value, bankAccount1.Currency, bankAccount2.Currency) - commission;
+            
+            var valueTo =  await _converter.GetValueInOtherCurrency(value, 
+                bankAccount1.Currency, bankAccount2.Currency) - commission;
+            
             await _moneyTransferHistory.AddHistory(value, bankAccount1.Currency, bankAccount1.Id, bankAccount2.Id);
+            
             bankAccount1.Balance -= value;
             bankAccount2.Balance += valueTo;
+            
             await _bankAccountRepository.UpdateBankAccount(bankAccount1);
             await _bankAccountRepository.UpdateBankAccount(bankAccount2);
             await _unitOfWork.SaveChangesAsync();

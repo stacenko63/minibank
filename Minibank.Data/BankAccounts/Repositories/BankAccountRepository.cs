@@ -37,10 +37,12 @@ namespace Minibank.Data.BankAccounts.Repositories
         public async Task<BankAccount> GetAccount(int accountId)
         {
             var entity = await _context.BankAccounts.AsNoTracking().FirstOrDefaultAsync(it => it.Id == accountId); 
+            
             if (entity == null)
             {
                 throw new ValidationException(Messages.NonExistentAccount);
             }
+            
             return new BankAccount
             {
                 Id = entity.Id,
@@ -56,6 +58,7 @@ namespace Minibank.Data.BankAccounts.Repositories
         public async Task UpdateBankAccount(BankAccount bankAccount)
         {
             var entity = await _context.BankAccounts.FirstAsync(it => it.Id == bankAccount.Id);
+            
             entity.Balance = bankAccount.Balance;
             entity.IsOpen = bankAccount.IsOpen;
             entity.OpenAccountDate = bankAccount.OpenAccountDate;
@@ -64,7 +67,7 @@ namespace Minibank.Data.BankAccounts.Repositories
 
         public async Task<bool> HasBankAccounts(int userId)
         {
-            return await _context.BankAccounts.FirstOrDefaultAsync(it => it.UserId == userId) != null;
+            return await _context.BankAccounts.AnyAsync(it => it.UserId == userId);
         }
     }
 }

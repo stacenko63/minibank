@@ -15,6 +15,7 @@ using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Domains.Users.Validators;
+using Minibank.Core.Tests.Tests.Users;
 using Moq;
 using Xunit;
 using Messages = Minibank.Core.Domains.Users.Services.Messages;
@@ -40,73 +41,76 @@ namespace Minibank.Core.Tests
         [Fact]
         public async Task CreateUser_LoginWhichHasAlreadyUsed_ShouldThrowValidationException()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            _fakeUserRepository.Setup(repository => repository.ContainsLogin(login).Result).Returns(true);
+            _fakeUserRepository.Setup(repository => repository.ContainsLogin(ConstValues.CorrectLogin)).ReturnsAsync(true);
+            
             var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.CreateUser(new User {Login = login, Email = email}));
+                _userService.CreateUser(ConstValues.CorrectUser));
             Assert.Equal(Messages.LoginIsAlreadyUsed, exception.Message);
         }
         
         [Fact]
         public async Task CreateUser_EmailWhichHasAlreadyUsed_ShouldThrowValidationException()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            _fakeUserRepository.Setup(repository => repository.ContainsEmail(email).Result).Returns(true);
+            _fakeUserRepository.Setup(repository => repository.ContainsEmail(ConstValues.CorrectEmail)).ReturnsAsync(true);
+            
             var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.CreateUser(new User {Login = login, Email = email}));
+                _userService.CreateUser(ConstValues.CorrectUser));
             Assert.Equal(Messages.EmailIsAlreadyUsed, exception.Message);
         }
         
         [Fact]
-        public async Task CreateUser_SuccessPath_ShouldBeCompleteSuccessfully()
+        public async Task CreateUser_SuccessPath_ShouldCheckRepositoryCall()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            await _userService.CreateUser(new User {Login = login, Email = email});
-            _fakeUserRepository.Verify(repository => repository.CreateUser(login, email), Times.Once);
+            await _userService.CreateUser(ConstValues.CorrectUser);
+            
+            _fakeUserRepository.Verify(repository => repository.
+                CreateUser(ConstValues.CorrectLogin, ConstValues.CorrectEmail), Times.Once);
         }
         
         [Fact]
         public async Task CreateUser_CheckValidatorWork_ShouldCheckValidatorCall()
         {
-            await _userService.CreateUser(new User {Login = "viktor", Email = "a@mail.ru"});
+            await _userService.CreateUser(ConstValues.CorrectUser);
+            
             Assert.True(_userValidator.IsCalled);
         }
         
         [Fact]
         public async Task UpdateUser_LoginWhichHasAlreadyUsed_ShouldThrowValidationException()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            _fakeUserRepository.Setup(repository => repository.ContainsLogin(login).Result).Returns(true);
+            _fakeUserRepository.Setup(repository => repository.ContainsLogin(ConstValues.CorrectLogin)).ReturnsAsync(true);
+            
             var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.UpdateUser(new User {Login = login, Email = email}));
+                _userService.UpdateUser(ConstValues.CorrectUser));
             Assert.Equal(Messages.LoginIsAlreadyUsed, exception.Message);
         }
         
         [Fact]
         public async Task UpdateUser_EmailWhichHasAlreadyUsed_ShouldThrowValidationException()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            _fakeUserRepository.Setup(repository => repository.ContainsEmail(email).Result).Returns(true);
+            _fakeUserRepository.Setup(repository => repository.ContainsEmail(ConstValues.CorrectEmail)).ReturnsAsync(true);
+            
             var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.UpdateUser(new User {Login = login, Email = email}));
+                _userService.UpdateUser(ConstValues.CorrectUser));
             Assert.Equal(Messages.EmailIsAlreadyUsed, exception.Message);
         }
 
         [Fact]
-        public async Task UpdateUser_SuccessPath_ShouldBeCompleteSuccessfully()
+        public async Task UpdateUser_SuccessPath_ShouldCheckRepositoryCall()
         {
-            const string email = "a@mail.ru", login = "Viktor";
-            const int id = 1;
-            var user = new User {Id = id, Email = email, Login = login};
-            _fakeUserRepository.Setup(repository => repository.GetUser(id).Result).Returns(user);
-            await _userService.UpdateUser(user);
-            _fakeUserRepository.Verify(repository => repository.UpdateUser(user), Times.Once);
+
+            _fakeUserRepository.Setup(repository => repository.
+                GetUser(ConstValues.UserId1)).ReturnsAsync(ConstValues.CorrectUser);
+            await _userService.UpdateUser(ConstValues.CorrectUser);
+            
+            _fakeUserRepository.Verify(repository => repository.UpdateUser(ConstValues.CorrectUser), Times.Once);
         }
 
         [Fact]
         public async Task UpdateUser_CheckValidatorWork_ShouldCheckValidatorCall()
         {
-            await _userService.UpdateUser(new User {Login = "viktor", Email = "a@mail.ru"});
+            await _userService.UpdateUser(ConstValues.CorrectUser);
+            
             Assert.True(_userValidator.IsCalled);
         }
         
@@ -114,71 +118,116 @@ namespace Minibank.Core.Tests
         [Fact]
         public async Task DeleteUser_UserWithBankAccount_ShouldThrowValidationException()
         {
-            const int id = 4; 
-            _fakeBankAccountRepository.Setup(repository => repository.HasBankAccounts(id).Result)
-                .Returns(true);
+            _fakeBankAccountRepository.Setup(repository => repository.HasBankAccounts(ConstValues.UserId1))
+                .ReturnsAsync(true);
+            
             var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.DeleteUser(id));
+                _userService.DeleteUser(ConstValues.UserId1));
             Assert.Equal(Messages.DeleteUserWithBankAccounts, exception.Message);
         }
         
         [Fact]
         public async Task DeleteUser_NonExistentUser_ShouldThrowValidationException()
         {
-            const int id = 4; 
-            _fakeUserRepository.Setup(repository => repository.GetUser(id)).Throws(new ValidationException(Messages.NonExistentUser));
-            var exception = await Assert.ThrowsAsync<ValidationException>(() => _userService.DeleteUser(id));
+
+            _fakeUserRepository.Setup(repository => repository.GetUser(ConstValues.UserId1)).
+                Throws(new ValidationException(Messages.NonExistentUser));
+            
+            var exception = await Assert.ThrowsAsync<ValidationException>(() => _userService.DeleteUser(ConstValues.UserId1));
             Assert.Equal(Messages.NonExistentUser, exception.Message);
         }
         
         [Fact]
         public async Task DeleteUser_SuccessPath_ShouldDeleteUser()
         {
-            const int id = 4; 
-            _fakeBankAccountRepository.Setup(repository => repository.HasBankAccounts(id).Result)
-                .Returns(false);
-            _fakeUserRepository.Setup(repository => repository.GetUser(id).Result).Returns(new User{Id = id});
-            await _userService.DeleteUser(id);
-            _fakeUserRepository.Verify(repository => repository.DeleteUser(id), Times.Once);
+            _fakeBankAccountRepository.Setup(repository => repository.HasBankAccounts(ConstValues.UserId1))
+                .ReturnsAsync(false);
+            _fakeUserRepository.Setup(repository => repository.GetUser(ConstValues.UserId1))
+                .ReturnsAsync(ConstValues.CorrectUser);
+            
+            await _userService.DeleteUser(ConstValues.UserId1);
+            
+            _fakeUserRepository.Verify(repository => repository.DeleteUser(ConstValues.UserId1), Times.Once);
         }
 
         [Fact]
         public async Task GetUser_NonExistentUser_ShouldThrowValidationException()
         {
-            const int id = 4; 
-            _fakeUserRepository.Setup(repository => repository.GetUser(id).Result).
-                Throws(new ValidationException(Messages.NonExistentUser));
-            var exception = await Assert.ThrowsAsync<ValidationException>(() => _userService.GetUser(id));
+            _fakeUserRepository.Setup(repository => repository.GetUser(ConstValues.UserId1)).
+                ThrowsAsync(new ValidationException(Messages.NonExistentUser));
+            
+            var exception = await Assert.ThrowsAsync<ValidationException>(() => _userService.GetUser(ConstValues.UserId1));
             Assert.Equal(Messages.NonExistentUser, exception.Message);
         }
         
         [Fact]
         public async Task GetUser_SuccessPath_ShouldGetUserFromBase()
         {
-            const string email = "a@mail.ru", login = "viktor";
-            const int id = 4;
-            _fakeUserRepository.Setup(repository => repository.GetUser(4).Result).Returns(new 
-                User{Id = id, Email = email, Login = login});
-            var result = await _userService.GetUser(id);
-            Assert.True(result.Id == id);
-            Assert.True(result.Email == email); 
-            Assert.True(result.Login == login);
+            _fakeUserRepository.Setup(repository => repository.GetUser(ConstValues.UserId1)).ReturnsAsync(ConstValues.CorrectUser);
+            var result = await _userService.GetUser(ConstValues.UserId1);
+            
+            Assert.True(result.Id == ConstValues.UserId1);
+            Assert.True(result.Email == ConstValues.CorrectEmail); 
+            Assert.True(result.Login == ConstValues.CorrectLogin);
         }
 
         [Fact]
         public async Task GetAllUsers_SuccessPath_ShouldGetAllUsersFromBase()
         {
-            const string email = "a@mail.ru", login = "viktor1";
-            const int id = 1;
-            _fakeUserRepository.Setup(repository => repository.GetAllUsers().Result).Returns(new
+            _fakeUserRepository.Setup(repository => repository.GetAllUsers()).ReturnsAsync(new
                 List<User>
                 {
-                    new User {Id = id, Email = email, Login = login},
+                    ConstValues.CorrectUser,
                 });
             var result = await _userService.GetAllUsers();
-            var element1 = result.First(it => it.Id == id);
+            var element1 = result.First(it => it.Id == ConstValues.UserId1);
+            
             Assert.True(result.Count() == 1);
-            Assert.True(element1.Email == email && element1.Login == login);
+            Assert.True(element1.Email == ConstValues.CorrectEmail && element1.Login == ConstValues.CorrectLogin);
+        }
+        
+        class UserValidate : IValidator<User>
+        {
+            public bool IsCalled { get; set; }
+
+            public UserValidate()
+            {
+                IsCalled = false;
+            }
+            public ValidationResult Validate(IValidationContext context)
+            {
+                IsCalled = true;
+                return new ValidationResult();
+            }
+
+            public async Task<ValidationResult> ValidateAsync(IValidationContext context, CancellationToken cancellation = new CancellationToken())
+            {
+                IsCalled = true;
+                return new ValidationResult();
+            }
+
+            public IValidatorDescriptor CreateDescriptor()
+            {
+                return new ValidatorDescriptor<User>(new List<IValidationRule>());
+            }
+
+            public bool CanValidateInstancesOfType(Type type)
+            {
+                return true;
+            }
+
+            public ValidationResult Validate(User instance)
+            {
+                IsCalled = true;
+                return new ValidationResult();
+
+            }
+
+            public async Task<ValidationResult> ValidateAsync(User instance, CancellationToken cancellation = new CancellationToken())
+            {
+                IsCalled = true;
+                return new ValidationResult();
+            }
         }
     }
 }

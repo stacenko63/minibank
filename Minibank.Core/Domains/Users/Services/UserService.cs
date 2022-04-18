@@ -33,14 +33,17 @@ namespace Minibank.Core.Domains.Users.Services
         public async Task CreateUser(User user)
         {
             await _userValidator.ValidateAndThrowAsync(user);
-            if (_userRepository.ContainsLogin(user.Login).Result)
+            
+            if (await _userRepository.ContainsLogin(user.Login))
             {
                 throw new ValidationException(Messages.LoginIsAlreadyUsed);
             }
-            if (_userRepository.ContainsEmail(user.Email).Result)
+            
+            if (await _userRepository.ContainsEmail(user.Email))
             {
                 throw new ValidationException(Messages.EmailIsAlreadyUsed);
             }
+            
             await _userRepository.CreateUser(user.Login, user.Email);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -53,26 +56,32 @@ namespace Minibank.Core.Domains.Users.Services
         public async Task UpdateUser(User user)
         {
             await _userValidator.ValidateAndThrowAsync(user);
-            if (_userRepository.ContainsLogin(user.Login).Result)
+            
+            if (await _userRepository.ContainsLogin(user.Login))
             {
                 throw new ValidationException(Messages.LoginIsAlreadyUsed);
             }
-            if (_userRepository.ContainsEmail(user.Email).Result)
+            
+            if (await _userRepository.ContainsEmail(user.Email))
             {
                 throw new ValidationException(Messages.EmailIsAlreadyUsed);
             }
+            
             var updateUser = await _userRepository.GetUser(user.Id);
+            
             await _userRepository.UpdateUser(updateUser);
             await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task DeleteUser(int id)
         {
-            if (_bankAccountRepository.HasBankAccounts(id).Result)
+            if (await _bankAccountRepository.HasBankAccounts(id))
             {
                 throw new ValidationException(Messages.DeleteUserWithBankAccounts);
             }
+            
             var user = await _userRepository.GetUser(id);
+            
             await _userRepository.DeleteUser(user.Id);
             await _unitOfWork.SaveChangesAsync();
         }

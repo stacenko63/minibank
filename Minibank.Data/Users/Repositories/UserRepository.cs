@@ -22,12 +22,14 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<User> GetUser(int id)
         { 
-            var entity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
-           if (entity == null)
-           {
-               throw new ValidationException(Messages.NonExistentUser);
-           }
-           return new User
+            var entity = await _context.Users.FirstOrDefaultAsync(i => i.Id == id);
+            
+            if (entity == null)
+            {
+                throw new ValidationException(Messages.NonExistentUser);
+            }
+
+            return new User
             {
                 Id = entity.Id,
                 Login = entity.Login,
@@ -46,7 +48,6 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsers()
         {
-            await _context.SaveChangesAsync();
             return await _context.Users.AsNoTracking().Select(it => new User
             {
                 Id = it.Id,
@@ -70,14 +71,12 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<bool> ContainsLogin(string login)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Login == login);
-            return entity != null; 
+            return await _context.Users.AnyAsync(it => it.Login == login);
         } 
         
         public async Task<bool> ContainsEmail(string email)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Email == email);
-            return entity != null; 
+            return await _context.Users.AnyAsync(it => it.Email == email);
         } 
     }
 }

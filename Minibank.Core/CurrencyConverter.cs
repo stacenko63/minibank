@@ -18,9 +18,9 @@ namespace Minibank.Core
             {
                 throw new ValidationException("The sum must not be a negative number!");
             }
-            var fromCurrencyValue = await _database.Get(fromCurrency); 
-            var toCurrencyValue = await _database.Get(toCurrency);
-            return amount * fromCurrencyValue / toCurrencyValue;
+            
+            return await _database.GetCurrencyValueInRubles(fromCurrency) / 
+                await _database.GetCurrencyValueInRubles(toCurrency) * amount;
         }
 
 

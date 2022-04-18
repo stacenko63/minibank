@@ -6,9 +6,12 @@ using Minibank.Core.Domains.BankAccounts.Services;
 using Minibank.Core.Domains.BankAccounts.Validators;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Tests.Tests.BankAccounts;
 using Moq;
 using Xunit;
 using Messages = Minibank.Core.Domains.BankAccounts.Validators.Messages;
+using UserConstValues = Minibank.Core.Tests.Tests.Users.ConstValues;
+using BankAccountConstValues = Minibank.Core.Tests.Tests.BankAccounts.ConstValues;
 
 namespace Minibank.Core.Tests.BankAccounts
 {
@@ -28,8 +31,11 @@ namespace Minibank.Core.Tests.BankAccounts
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
                 _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 1, Balance = -1000, Currency = "RUB"
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.NegativeBalance, 
+                    Currency = BankAccountConstValues.CorrectCurrency
                 }));
+            
             Assert.Contains(Messages.NegativeStartBalance, exception.Message);
         }
 
@@ -41,8 +47,11 @@ namespace Minibank.Core.Tests.BankAccounts
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
                 _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = currency
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.CorrectBalance, 
+                    Currency = currency
                 }));
+            
             Assert.Contains(Messages.NotPermittedCurrency, exception.Message);
         }
 
@@ -52,12 +61,15 @@ namespace Minibank.Core.Tests.BankAccounts
         [InlineData("EUR")]
         public async Task BankAccountValidator_SuccessPath_ShouldBeCompleteSuccessfully(string currency)
         {
-            const int userId = 2;
-            _fakeUserRepository.Setup(repository => repository.GetUser(userId).Result)
-                .Returns(new User {Id = userId, Email = "a@mail.ru", Login = "a"});
+            _fakeUserRepository.Setup(repository => repository.GetUser(UserConstValues.UserId1))
+                .ReturnsAsync(UserConstValues.CorrectUser);
+            
             await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = userId, Balance = 1000, Currency = currency
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.CorrectBalance, 
+                    Currency = currency
                 });
         }
+        
     }
 }

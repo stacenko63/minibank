@@ -8,6 +8,7 @@ using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Domains.Users.Validators;
+using Minibank.Core.Tests.Tests.Users;
 using Moq;
 using Xunit;
 using Messages = Minibank.Core.Domains.Users.Validators.Messages;
@@ -30,7 +31,12 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_EmptyLogin_ShouldThrowValidationException()
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "", Email = "a@mail.ru"}));  
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "", 
+                    Email = ConstValues.CorrectEmail
+                }));  
+            
             Assert.Contains(Messages.EmptyLogin, exception.Message);
         }
         
@@ -44,7 +50,12 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_LoginWithSpaces_ShouldThrowValidationException(string login)
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = "a@mail.ru"}));
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = login, 
+                    Email = ConstValues.CorrectEmail
+                }));
+            
             Assert.Contains(Messages.LoginWithSpaces, exception.Message);
         }
         
@@ -52,8 +63,10 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_LoginWithLengthMoreThan20_ShouldThrowValidationException()
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "dddddddddddddddddddddddddddddddddddddddddddddddddddd", 
-                    Email = "a@mail.ru"}));
+                _userValidator.ValidateAndThrowAsync(new User {
+                    Login = "dddddddddddddddddddddddddddddddddddddddddddddddddddd", 
+                    Email = ConstValues.CorrectEmail}));
+            
             Assert.Contains(Messages.LoginWithLengthMoreThan20, exception.Message);
         }
         
@@ -64,17 +77,32 @@ namespace Minibank.Core.Tests.Users
         [InlineData(123, 256)]
         public async Task UserValidator_LoginWithIncorrectFormat_ShouldThrowValidationException(int begin, int end)
         {
-            const string email = "a@mail.ru";
             for (int i = begin; i < end; i++)
             {
                 var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = (char) i + "GG", Email = email}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = (char) i + "GG", 
+                        Email = ConstValues.CorrectEmail
+                    }));
                 Assert.Contains(Messages.LoginFormat, exception.Message);
+                
+                
                 exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i + "GG", Email = email}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = "GG" + (char) i + "GG", 
+                        Email = ConstValues.CorrectEmail
+                    }));
                 Assert.Contains(Messages.LoginFormat, exception.Message);
+                
+                
                 exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i, Email = email}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = "GG" + (char) i, 
+                        Email = ConstValues.CorrectEmail
+                    }));
                 Assert.Contains(Messages.LoginFormat, exception.Message);
             }
         }
@@ -85,12 +113,25 @@ namespace Minibank.Core.Tests.Users
         [InlineData(97,123)]
         public async Task UserValidator_SuccessPathsLogin_ShouldBeCompleteSuccessfully(int begin, int end)
         {
-            const string email = "a@mail.ru";
             for (int i = begin; i < end; i++)
             {
-                await _userValidator.ValidateAndThrowAsync(new User {Login = (char) i + "GG", Email = email});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i + "GG", Email = email});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i, Email = email});
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = (char) i + "GG", 
+                    Email = ConstValues.CorrectEmail
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "GG" + (char) i + "GG", 
+                    Email = ConstValues.CorrectEmail
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "GG" + (char) i, 
+                    Email = ConstValues.CorrectEmail
+                });
             }
         }
         
@@ -99,7 +140,12 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_EmptyEmail_ShouldThrowValidationException()
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = ""}));
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = ""
+                }));
+            
             Assert.Contains(Messages.EmptyEmail, exception.Message);
         }
         
@@ -112,7 +158,12 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_EmailWithSpaces_ShouldThrowValidationException(string email)
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = email}));
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = email
+                }));
+            
             Assert.Contains(Messages.EmailWithSpaces, exception.Message);
         }
         
@@ -124,17 +175,32 @@ namespace Minibank.Core.Tests.Users
         [InlineData(123, 256)]
         public async Task UserValidator_EmailWithIncorrectFormat_ShouldThrowValidationException(int begin, int end)
         {
-            const string login = "viktor";
             for (int i = begin; i < end; i++)
             {
                 var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = (char) i + "a@mail.ru"}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin, 
+                        Email = (char) i + "a@mail.ru"
+                    }));
                 Assert.Contains(Messages.EmailFormat, exception.Message);
+                
+                
                 exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = "a" + (char) i + "gg@mail.ru"}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin, 
+                        Email = "a" + (char) i + "gg@mail.ru"
+                    }));
                 Assert.Contains(Messages.EmailFormat, exception.Message);
+
+
                 exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = "a" + (char) i + "@mail.ru"}));
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin,
+                        Email = "a" + (char) i + "@mail.ru"
+                    }));
                 Assert.Contains(Messages.EmailFormat, exception.Message);
             }
         }
@@ -151,17 +217,22 @@ namespace Minibank.Core.Tests.Users
         public async Task UserValidator_EmailNotMailRu_ShouldThrowValidationException(string email)
         {
             var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => 
-                _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = email}));
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = email
+                }));
+            
             Assert.Contains(Messages.EmailNotMailRu, exception.Message);
         }
 
         [Fact]
         public async Task UserValidator_SuccessPath_ShouldBeCompleteSuccessfully()
         {
-            const string login = "viktor", email = "a@mail.ru";
-            _fakeUserRepository.Setup(repository => repository.ContainsLogin(login).Result).Returns(false);
-            _fakeUserRepository.Setup(repository => repository.ContainsEmail(email).Result).Returns(false);
-            await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = email});
+            _fakeUserRepository.Setup(repository => repository.ContainsLogin(ConstValues.CorrectLogin)).ReturnsAsync(false);
+            _fakeUserRepository.Setup(repository => repository.ContainsEmail(ConstValues.CorrectEmail)).ReturnsAsync(false);
+
+            await _userValidator.ValidateAndThrowAsync(ConstValues.CorrectUser);
         }
         
         [Theory]
@@ -170,12 +241,25 @@ namespace Minibank.Core.Tests.Users
         [InlineData(97,123)]
         public async Task UserValidator_SuccessPathsEmail_ShouldBeCompleteSuccessfully(int begin, int end)
         {
-            const string login = "viktor";
             for (int i = begin; i < end; i++)
             {
-                await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = (char) i + "a@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = "a" + (char) i + "gg@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = login, Email = "a" + (char) i + "@mail.ru"});
+                await _userValidator.ValidateAndThrowAsync(new User 
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = (char) i + "a@mail.ru"
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = "a" + (char) i + "gg@mail.ru"
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = "a" + (char) i + "@mail.ru"
+                });
             }
         }
         

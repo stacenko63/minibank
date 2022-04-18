@@ -21,9 +21,11 @@ namespace Minibank.Data
             {
                 options.BaseAddress = new Uri(configuration["CourseBaseUri"]);
             });
+            
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBankAccountRepository, BankAccountRepository>();
             services.AddScoped<IMoneyTransferRepository, MoneyTransferHistoryRepository>();
+            
             services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             services.AddDbContext<MiniBankContext>(options => 
                 options.UseNpgsql(configuration["DatabaseUrl"]));

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services: 
+  storage:
+    container_name: minibank_storage
+    image: postgres:12
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: minibank
+      POSTGRES_USER: minibank_app
+      POSTGRES_PASSWORD: minibank_app_password
+    volumes:
+        - ~/volumes/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d minibank -U minibank_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./Minibank.Dockerfile
+    depends_on: 
+      storage:
+        condition: service_healthy
+    ports:
+        - "5000:5000"
+        - "5001:5001"
+    environment:
+        DataBase_ConnectionString: Host=storage:Port=5432;Database=minibank:Username=minibank_app;Password=minimank_app_password 

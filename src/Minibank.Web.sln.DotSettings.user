@@ -1,0 +1,12 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="C:\Users\User\RiderProjects\Minibank.Web\src\Minibank.Web\bin\Debug\net5.0\ref\Minibank.Web.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=99c05861_002D20b6_002D4d4e_002D8d32_002D5b8a65a2369b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UserValidatorTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.Users.UserValidatorTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.UserServiceTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccounts.BankAccountValidatorTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::A4DA5E34-850A-471B-A240-A0BA23F2EFA4::net5.0::Minibank.Core.Tests.BankAccountServiceTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

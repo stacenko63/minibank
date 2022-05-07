@@ -24,7 +24,6 @@ namespace Minibank.Web.Controllers.Users
          }
     
          [HttpGet("Get")]
-         //[Authorize(Roles = "admin")]
          public async Task<IEnumerable<UserDtoGet>> GetAllUsers()
          {
              var result =  await _userService.GetAllUsers();
@@ -39,7 +38,6 @@ namespace Minibank.Web.Controllers.Users
          
          
          [HttpGet("{id}")]
-         //[Authorize(Roles = "admin")]
          public async Task<UserDtoGet> GetUser(int id)
          {
              var model = await _userService.GetUser(id);
@@ -52,7 +50,6 @@ namespace Minibank.Web.Controllers.Users
          }
 
          [HttpPost]
-         //[Authorize(Roles = "admin")]
          public async Task CreateUser(UserDtoPostOrPut model) 
          {
              await _userService.CreateUser(new User
@@ -63,7 +60,6 @@ namespace Minibank.Web.Controllers.Users
          }
          
          [HttpPut("{id}")]
-         //[Authorize(Roles = "admin")]
          public async Task UpdateUser(int id, UserDtoPostOrPut userDtoGet)
          {
              await _userService.UpdateUser(new User
@@ -75,7 +71,6 @@ namespace Minibank.Web.Controllers.Users
          }
          
          [HttpDelete("{id}")]
-         //[Authorize(Roles = "admin")]
          public async Task DeleteUser(int id)
          {
              await _userService.DeleteUser(id);

@@ -21,28 +21,24 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
         
         [HttpPost]
-        //[Authorize(Roles = "admin")]
         public async Task Create(int userId, string currencyCode, double startBalance)
         {
             await _bankAccountService.CreateBankAccount(userId, currencyCode, startBalance);
         }
 
         [HttpPatch("/Id/Close")]
-        //[Authorize(Roles = "admin")]
         public async Task CloseAccount(int id)
         {
             await _bankAccountService.CloseAccount(id);
         }
 
         [HttpGet("/Commision")]
-        //[Authorize(Roles = "admin")]
         public async Task<double> GetCommision(double value, int fromAccountId, int toAccountId)
         {
             return await _bankAccountService.GetCommission(value, fromAccountId, toAccountId);
         }
         
         [HttpPost("/MoneyTransfer")]
-        //[Authorize(Roles = "admin")]
         public async Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
         {
             await _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId); 

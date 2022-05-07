@@ -19,7 +19,6 @@ namespace Minibank.Web.Controllers
         }
 
          [HttpGet]
-         //[Authorize(Roles = "m2m")]
          public async Task<double> Get(double amount, string fromCurrency, string toCurrency)
          {
              return await _converter.GetValueInOtherCurrency(amount, fromCurrency,toCurrency);

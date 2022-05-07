@@ -5,10 +5,6 @@ WORKDIR /src
 
 COPY . .
 
-RUN echo "PWD is: $PWD" 
-
-RUN ls 
-
 RUN dotnet build Minibank.Web -c Release -r linux-x64
 
 RUN dotnet test Minibank.Core.Tests --no-build 

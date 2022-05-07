@@ -9,7 +9,7 @@ RUN dotnet build Minibank.Web -c Release -r linux-x64
 
 RUN dotnet test Minibank.Core.Tests --no-build 
 
-RUN dotnet pushish Minibank.Web -c Release -r linux-x64 --no-build -o /dist
+RUN dotnet publish Minibank.Web -c Release -r linux-x64 --no-build -o /dist
 
 
 

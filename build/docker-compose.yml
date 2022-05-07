@@ -21,8 +21,8 @@ services:
   app:
     container_name: app
     build:
-      context: .
-      dockerfile: ./Minibank.Dockerfile
+      context: ../src
+      dockerfile: ../build/Minibank.Dockerfile
     depends_on: 
       storage:
         condition: service_healthy

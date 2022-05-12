@@ -1,8 +1,10 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Minibank.Core;
 
 namespace Minibank.Web.Middlewares
 {
@@ -19,19 +21,25 @@ namespace Minibank.Web.Middlewares
         {
             try
             {
-                await next(httpContext);
-                if (httpContext.Response.StatusCode == 401) throw new Exception("You are not Authenticate!");
-                
-                var token = await httpContext.GetTokenAsync("access_token");
-                var handler = new JwtSecurityTokenHandler();
 
-                if (DateTime.UtcNow > handler.ReadToken(token).ValidTo)
+                var token = await httpContext.GetTokenAsync("access_token");
+                
+                if (token != null)
                 {
-                    httpContext.Response.StatusCode = 403;
-                    throw new Exception("Expired token!");
+                    var handler = new JwtSecurityTokenHandler();
+                
+                    if (DateTime.UtcNow > handler.ReadToken(token).ValidTo)
+                    {
+                        httpContext.Response.StatusCode = 403;
+                        throw new CustomAuthenticationException("Expired token!");
+                    }
+
                 }
+                
+                await next(httpContext);
+                
             }
-            catch (Exception exception)
+            catch (CustomAuthenticationException exception)
             {
                 await httpContext.Response.WriteAsJsonAsync(new {Message = exception.Message});
             }

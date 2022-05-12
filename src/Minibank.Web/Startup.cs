@@ -111,9 +111,9 @@ namespace Minibank.Web
             app.UseRouting();
             
             app.UseMiddleware<CustomAuthenticationMiddleware>();
-
+            
             app.UseAuthentication();
-
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

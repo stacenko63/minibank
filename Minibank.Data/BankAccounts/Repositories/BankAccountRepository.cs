@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Minibank.Core;
 using Minibank.Core.Domains.BankAccounts;
 using Minibank.Core.Domains.BankAccounts.Repositories;
@@ -12,37 +14,34 @@ namespace Minibank.Data.BankAccounts.Repositories
 {
     public class BankAccountRepository : IBankAccountRepository
     {
-        private static List<BankAccountDBModel> _bankAccountDbModels = new List<BankAccountDBModel>();
+        private readonly MiniBankContext _context;
         
         private readonly IUserRepository _userRepository;
 
         private readonly IMoneyTransferHistoryService _moneyTransferHistory;
-
-        private static int _id = 1;
-        public BankAccountRepository(IUserRepository userRepository, ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory)
+        public BankAccountRepository(IUserRepository userRepository, ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory, MiniBankContext context)
         {
             _userRepository = userRepository;
             _moneyTransferHistory = moneyTransferHistory;
+            _context = context;
         }
 
-        public void CreateBankAccount(int userId, string currencyCode, double startBalance)
+        public async Task CreateBankAccount(int userId, string currencyCode, double startBalance)
         {
-            var entity = new BankAccountDBModel
+            await _context.BankAccounts.AddAsync(new BankAccountDBModel
             {
-                Id = _id++,
                 UserId = userId,
                 Balance = startBalance,
                 Currency = currencyCode,
                 IsOpen = true,
                 OpenAccountDate = DateTime.Now,
                 CloseAccountDate = DateTime.MinValue
-            };
-            _bankAccountDbModels.Add(entity);
+            });
         }
 
-        public BankAccount GetAccount(int accountId)
+        public async Task<BankAccount> GetAccount(int accountId)
         {
-            var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == accountId);
+            var entity = await _context.BankAccounts.AsNoTracking().FirstOrDefaultAsync(it => it.Id == accountId); 
             if (entity == null)
             {
                 throw new ValidationException("This accountId is not found in base!");
@@ -59,25 +58,30 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public void UpdateBankAccount(BankAccount bankAccount)
+        public async Task UpdateBankAccount(BankAccount bankAccount)
         {
-            var entity = _bankAccountDbModels.FirstOrDefault(it => it.Id == bankAccount.Id);
+            var entity = await _context.BankAccounts.FirstOrDefaultAsync(it => it.Id == bankAccount.Id);
             if (entity == null)
             {
                 throw new ValidationException("You can't update this bank account, because this id is not found in base!");
             }
-            entity.Id = bankAccount.Id;
-            entity.UserId = bankAccount.UserId;
+            if (entity.UserId != bankAccount.UserId)
+            {
+                throw new ValidationException("You can't update userId in bank account!");
+            }
+            if (entity.Currency != bankAccount.Currency)
+            {
+                throw new ValidationException("You can't update bank account's currency!");
+            }
             entity.Balance = bankAccount.Balance;
-            entity.Currency = bankAccount.Currency;
             entity.IsOpen = bankAccount.IsOpen;
             entity.OpenAccountDate = bankAccount.OpenAccountDate;
             entity.CloseAccountDate = bankAccount.CloseAccountDate;
         }
 
-        public bool HasBankAccounts(int userId)
+        public async Task<bool> HasBankAccounts(int userId)
         {
-            return _bankAccountDbModels.FirstOrDefault(it => it.UserId == userId) != null;
+            return await _context.BankAccounts.FirstOrDefaultAsync(it => it.UserId == userId) != null;
         }
     }
 }

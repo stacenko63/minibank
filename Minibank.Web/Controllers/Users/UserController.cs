@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Minibank.Core;
@@ -21,10 +22,10 @@ namespace Minibank.Web.Controllers.Users
          }
     
          [HttpGet("Get")]
-         public IEnumerable<UserDtoGet> GetAllUsers()
+         public async Task<IEnumerable<UserDtoGet>> GetAllUsers()
          {
-             return _userService.GetAllUsers()
-                 .Select(it => new UserDtoGet
+             var result =  await _userService.GetAllUsers();
+             return result.Select(it => new UserDtoGet
                  {
                      Id = it.Id,
                      Login = it.Login,
@@ -35,22 +36,21 @@ namespace Minibank.Web.Controllers.Users
          
          
          [HttpGet("{id}")]
-         public UserDtoGet GetUser(int id)
+         public async Task<UserDtoGet> GetUser(int id)
          {
-             var model = _userService.GetUser(id);
+             var model = await _userService.GetUser(id);
              return new UserDtoGet
              {
                  Id = model.Id,
                  Login = model.Login,
                  Email = model.Email,
              };
-         
          }
 
          [HttpPost]
-         public void CreateUser(UserDtoPostOrPut model) 
+         public async Task CreateUser(UserDtoPostOrPut model) 
          {
-             _userService.CreateUser(new User
+             await _userService.CreateUser(new User
              {
                  Login = model.Login,
                  Email = model.Email
@@ -58,9 +58,9 @@ namespace Minibank.Web.Controllers.Users
          }
          
          [HttpPut("{id}")]
-         public void UpdateUser(int id, UserDtoPostOrPut userDtoGet)
+         public async Task UpdateUser(int id, UserDtoPostOrPut userDtoGet)
          {
-             _userService.UpdateUser(new User
+             await _userService.UpdateUser(new User
              {
                  Id = id,
                  Login = userDtoGet.Login,
@@ -69,9 +69,9 @@ namespace Minibank.Web.Controllers.Users
          }
          
          [HttpDelete("{id}")]
-         public void DeleteUser(int id)
+         public async Task DeleteUser(int id)
          {
-             _userService.DeleteUser(id);
+             await _userService.DeleteUser(id);
          }
 
      }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
@@ -12,50 +14,49 @@ namespace Minibank.Core.Domains.Users.Services
         private readonly IUserRepository _userRepository;
 
         private readonly IBankAccountRepository _bankAccountRepository;
-        public UserService(IUserRepository userRepository, IBankAccountRepository bankAccountRepository)
+
+        private readonly IUnitOfWork _unitOfWork;
+
+        private readonly IValidator<User> _userValidator;
+        public UserService(IUserRepository userRepository, IBankAccountRepository bankAccountRepository, IUnitOfWork unitOfWork, IValidator<User> userValidator)
         {
             _userRepository = userRepository;
             _bankAccountRepository = bankAccountRepository;
+            _unitOfWork = unitOfWork;
+            _userValidator = userValidator;
         }
-        public User GetUser(int id)
+        public async Task<User> GetUser(int id)
         {
-            return _userRepository.GetUser(id);
-        }
-
-        public void CreateUser(User user)
-        {
-            if (string.IsNullOrEmpty(user.Login))
-            {
-                throw new ValidationException("Incorrect login!");
-            }
-            if (user.Login.Contains(" "))
-            {
-                throw new ValidationException("Login must not have some spaces!");
-            }
-            if (user.Login.Length > 20)
-            {
-                throw new ValidationException("Login's length must not be more that 20 symbols!");
-            }
-            _userRepository.CreateUser(user.Login, user.Email);
+            return await _userRepository.GetUser(id);
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task CreateUser(User user)
         {
-            return _userRepository.GetAllUsers();
+            await _userValidator.ValidateAndThrowAsync(user);
+            await _userRepository.CreateUser(user.Login, user.Email);
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public void UpdateUser(User user)
+        public async Task<IEnumerable<User>> GetAllUsers()
         {
-            _userRepository.UpdateUser(user);
+            return await _userRepository.GetAllUsers();
         }
 
-        public void DeleteUser(int id)
+        public async Task UpdateUser(User user)
         {
-            if (_bankAccountRepository.HasBankAccounts(id))
+            await _userValidator.ValidateAndThrowAsync(user);
+            await _userRepository.UpdateUser(user);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task DeleteUser(int id)
+        {
+            if (_bankAccountRepository.HasBankAccounts(id).Result)
             {
-                throw new ValidationException("You can't delete user which have one or more BanAccounts");
+                throw new ValidationException("You can't delete user which have one or more BankAccounts");
             }
-            _userRepository.DeleteUser(id);
+            await _userRepository.DeleteUser(id);
+            await _unitOfWork.SaveChangesAsync();
         }
 
     }

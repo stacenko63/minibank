@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Minibank.Core.Domains.MoneyTransferHistory.Repositories;
 using Minibank.Core.Enums;
 
@@ -8,12 +9,15 @@ namespace Minibank.Core.Domains.MoneyTransferHistory.Services
     {
         private readonly IMoneyTransferRepository _moneyTransferRepository;
 
-        public MoneyTransferHistoryService(IMoneyTransferRepository moneyTransferRepository)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public MoneyTransferHistoryService(IMoneyTransferRepository moneyTransferRepository, IUnitOfWork unitOfWork)
         {
             _moneyTransferRepository = moneyTransferRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public void AddHistory(double value, string currencyCode, int fromAccountId, int toAccountId)
+        public async Task AddHistory(double value, string currencyCode, int fromAccountId, int toAccountId)
         {
             if (value <= 0)
             {
@@ -29,8 +33,8 @@ namespace Minibank.Core.Domains.MoneyTransferHistory.Services
             {
                 throw new ValidationException("This currency is unavailable at the moment!");
             }
-            
-            _moneyTransferRepository.AddHistory(value, correctCurrencyCode, fromAccountId, toAccountId);
+            await _moneyTransferRepository.AddHistory(value, correctCurrencyCode, fromAccountId, toAccountId);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

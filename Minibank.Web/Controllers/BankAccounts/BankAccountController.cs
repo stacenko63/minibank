@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Minibank.Core.Domains.BankAccounts;
 using Minibank.Core.Domains.BankAccounts.Services;
@@ -18,27 +19,27 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
         
         [HttpPost]
-        public void Create(int userId, string currencyCode, double startBalance)
+        public async Task Create(int userId, string currencyCode, double startBalance)
         {
-            _bankAccountService.CreateBankAccount(userId, currencyCode, startBalance);
+            await _bankAccountService.CreateBankAccount(userId, currencyCode, startBalance);
         }
 
         [HttpPatch("/Id/Close")]
-        public void CloseAccount(int id)
+        public async Task CloseAccount(int id)
         {
-            _bankAccountService.CloseAccount(id);
+            await _bankAccountService.CloseAccount(id);
         }
 
         [HttpGet("/Commision")]
-        public double GetCommision(double value, int fromAccountId, int toAccountId)
+        public async Task<double> GetCommision(double value, int fromAccountId, int toAccountId)
         {
-            return _bankAccountService.GetCommision(value, fromAccountId, toAccountId);
+            return await _bankAccountService.GetCommission(value, fromAccountId, toAccountId);
         }
         
         [HttpPost("/MoneyTransfer")]
-        public void MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
+        public async Task MakeMoneyTransfer(double value, int fromAccountId, int toAccountId)
         {
-            _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId); 
+            await _bankAccountService.MakeMoneyTransfer(value, fromAccountId, toAccountId); 
         }
     }
 }

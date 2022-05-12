@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Minibank.Core;
@@ -23,6 +24,9 @@ namespace Minibank.Data
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBankAccountRepository, BankAccountRepository>();
             services.AddScoped<IMoneyTransferRepository, MoneyTransferHistoryRepository>();
+            services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+            services.AddDbContext<MiniBankContext>(options => 
+                options.UseNpgsql(configuration["DatabaseUrl"]));
             return services; 
         }
     }

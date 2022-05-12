@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Minibank.Core;
 using Minibank.Data.HttpClients.Models;
 
@@ -19,13 +20,13 @@ namespace Minibank.Data
             _httpClient = httpClient;
         }
 
-        public double Get(string currencyCode)
+        public async Task<double> Get(string currencyCode)
         {
+            var response = await _httpClient.GetFromJsonAsync<CourseResponse>("daily_json.js");
             if (currencyCode.ToUpper() == "RUB")
             {
                 return 1;
             }
-            var response = _httpClient.GetFromJsonAsync<CourseResponse>("daily_json.js").GetAwaiter().GetResult();
             if (response.Valute.ContainsKey(currencyCode.ToLower()))
             {
                 return response.Valute[currencyCode.ToLower()].Value;

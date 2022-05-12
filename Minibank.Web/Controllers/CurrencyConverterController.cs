@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Minibank.Core;
 
@@ -16,9 +17,9 @@ namespace Minibank.Web.Controllers
         }
 
          [HttpGet]
-         public double Get(double amount, string fromCurrency, string toCurrency)
+         public async Task<double> Get(double amount, string fromCurrency, string toCurrency)
          {
-             return _converter.GetValueInOtherCurrency(amount, fromCurrency,toCurrency);
+             return await _converter.GetValueInOtherCurrency(amount, fromCurrency,toCurrency);
          }
 
 

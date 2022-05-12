@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.MoneyTransferHistory.Repositories;
 
@@ -7,20 +8,22 @@ namespace Minibank.Data.MoneyTransferHistory.Repositories
 {
     public class MoneyTransferHistoryRepository : IMoneyTransferRepository
     {
-        private static List<MoneyTransferHistoryDBModel> _moneyTransferHistoryDBModels = new List<MoneyTransferHistoryDBModel>();
+        private readonly MiniBankContext _context;
 
-        private static int _id = 1;
-        public void AddHistory(double value, string currencyCode, int fromAccountId, int toAccountId)
+        public MoneyTransferHistoryRepository(MiniBankContext context)
         {
-            var entity = new MoneyTransferHistoryDBModel
+            _context = context;
+        }
+
+        public async Task AddHistory(double value, string currencyCode, int fromAccountId, int toAccountId)
+        {
+            await _context.MoneyTransferHistories.AddAsync(new MoneyTransferHistoryDBModel
             {
-                Id = _id++,
                 Value = value,
                 CurrencyCode = currencyCode,
                 FromAccountId = fromAccountId,
                 ToAccountId = toAccountId
-            };
-            _moneyTransferHistoryDBModels.Add(entity);
+            });
         }
 
     }

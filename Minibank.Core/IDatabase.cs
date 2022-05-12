@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Minibank.Core
 {
     public interface IDatabase
     {
-        public double Get(string currencyCode);
+        public Task<double> Get(string currencyCode);
     }
 }

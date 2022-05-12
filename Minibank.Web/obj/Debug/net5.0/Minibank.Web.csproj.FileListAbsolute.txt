@@ -38,3 +38,6 @@ C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Microsoft
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Npgsql.dll
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\FluentValidation.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\FluentValidation.AspNetCore.dll
+C:\Users\User\RiderProjects\Minibank.Web\Minibank.Web\bin\Debug\net5.0\FluentValidation.DependencyInjectionExtensions.dll

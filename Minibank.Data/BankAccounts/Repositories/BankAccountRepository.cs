@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Minibank.Core;
 using Minibank.Core.Domains.BankAccounts;
 using Minibank.Core.Domains.BankAccounts.Repositories;
+using Minibank.Core.Domains.BankAccounts.Services;
 using Minibank.Core.Domains.MoneyTransferHistory.Services;
 using Minibank.Core.Domains.Users.Repositories;
 
@@ -15,14 +16,8 @@ namespace Minibank.Data.BankAccounts.Repositories
     public class BankAccountRepository : IBankAccountRepository
     {
         private readonly MiniBankContext _context;
-        
-        private readonly IUserRepository _userRepository;
-
-        private readonly IMoneyTransferHistoryService _moneyTransferHistory;
         public BankAccountRepository(IUserRepository userRepository, ICurrencyConverter converter, IMoneyTransferHistoryService moneyTransferHistory, MiniBankContext context)
         {
-            _userRepository = userRepository;
-            _moneyTransferHistory = moneyTransferHistory;
             _context = context;
         }
 
@@ -30,7 +25,7 @@ namespace Minibank.Data.BankAccounts.Repositories
         {
             await _context.BankAccounts.AddAsync(new BankAccountDBModel
             {
-                UserId = userId,
+                UserId = userId, 
                 Balance = startBalance,
                 Currency = currencyCode,
                 IsOpen = true,
@@ -42,10 +37,12 @@ namespace Minibank.Data.BankAccounts.Repositories
         public async Task<BankAccount> GetAccount(int accountId)
         {
             var entity = await _context.BankAccounts.AsNoTracking().FirstOrDefaultAsync(it => it.Id == accountId); 
+            
             if (entity == null)
             {
-                throw new ValidationException("This accountId is not found in base!");
+                throw new ValidationException(Messages.NonExistentAccount);
             }
+            
             return new BankAccount
             {
                 Id = entity.Id,
@@ -60,19 +57,8 @@ namespace Minibank.Data.BankAccounts.Repositories
 
         public async Task UpdateBankAccount(BankAccount bankAccount)
         {
-            var entity = await _context.BankAccounts.FirstOrDefaultAsync(it => it.Id == bankAccount.Id);
-            if (entity == null)
-            {
-                throw new ValidationException("You can't update this bank account, because this id is not found in base!");
-            }
-            if (entity.UserId != bankAccount.UserId)
-            {
-                throw new ValidationException("You can't update userId in bank account!");
-            }
-            if (entity.Currency != bankAccount.Currency)
-            {
-                throw new ValidationException("You can't update bank account's currency!");
-            }
+            var entity = await _context.BankAccounts.FirstAsync(it => it.Id == bankAccount.Id);
+            
             entity.Balance = bankAccount.Balance;
             entity.IsOpen = bankAccount.IsOpen;
             entity.OpenAccountDate = bankAccount.OpenAccountDate;
@@ -81,7 +67,7 @@ namespace Minibank.Data.BankAccounts.Repositories
 
         public async Task<bool> HasBankAccounts(int userId)
         {
-            return await _context.BankAccounts.FirstOrDefaultAsync(it => it.UserId == userId) != null;
+            return await _context.BankAccounts.AnyAsync(it => it.UserId == userId);
         }
     }
 }

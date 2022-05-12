@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Minibank.Core;
@@ -24,15 +25,14 @@ namespace Minibank.Web.Middlewares
             catch (ValidationException exception)
             {
                 httpContext.Response.StatusCode = 400;
-                
+                await httpContext.Response.WriteAsJsonAsync(exception.Message);
             }
             catch (FluentValidation.ValidationException exception)
             {
                 httpContext.Response.StatusCode = 400;
-                var errors = exception.Errors.Select(x => x.ErrorMessage).ToList();
-                await httpContext.Response.WriteAsJsonAsync(errors[0]);
+                await httpContext.Response.WriteAsJsonAsync(exception.Errors.Select(x => x.ErrorMessage).ToList());
             }
-            catch (NullReferenceException exception)
+            catch (NullReferenceException)
             {
                 httpContext.Response.StatusCode = 400;
                 await httpContext.Response.WriteAsJsonAsync("You shouldn't use null values!");

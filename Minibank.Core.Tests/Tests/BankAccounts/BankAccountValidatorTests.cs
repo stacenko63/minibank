@@ -6,8 +6,12 @@ using Minibank.Core.Domains.BankAccounts.Services;
 using Minibank.Core.Domains.BankAccounts.Validators;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Tests.Tests.BankAccounts;
 using Moq;
 using Xunit;
+using Messages = Minibank.Core.Domains.BankAccounts.Validators.Messages;
+using UserConstValues = Minibank.Core.Tests.Tests.Users.ConstValues;
+using BankAccountConstValues = Minibank.Core.Tests.Tests.BankAccounts.ConstValues;
 
 namespace Minibank.Core.Tests.BankAccounts
 {
@@ -25,42 +29,47 @@ namespace Minibank.Core.Tests.BankAccounts
         [Fact]
         public async Task BankAccountValidator_BalanceLessThanZero_ShouldThrowValidationException()
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
                 _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 1, Balance = -1000, Currency = "RUB"
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.NegativeBalance, 
+                    Currency = BankAccountConstValues.CorrectCurrency
                 }));
+            
+            Assert.Contains(Messages.NegativeStartBalance, exception.Message);
         }
 
-        [Fact]
-        public async Task BankAccountValidator_IncorrectCurrency_ShouldThrowValidationException()
+        [Theory]
+        [InlineData("")]
+        [InlineData("TRY")]
+        [InlineData("JPA")]
+        public async Task BankAccountValidator_IncorrectCurrency_ShouldThrowValidationException(string currency)
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
                 _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = ""
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.CorrectBalance, 
+                    Currency = currency
                 }));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = "TRY"
-                }));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = "JPA"
-                }));
+            
+            Assert.Contains(Messages.NotPermittedCurrency, exception.Message);
         }
 
-        [Fact]
-        public async Task BankAccountValidator_SuccessPath_ShouldBeCompleteSuccessfully()
+        [Theory]
+        [InlineData("RUB")]
+        [InlineData("USD")]
+        [InlineData("EUR")]
+        public async Task BankAccountValidator_SuccessPath_ShouldBeCompleteSuccessfully(string currency)
         {
-            _fakeUserRepository.Setup(repository => repository.GetUser(2).Result)
-                .Returns(new User {Id = 2, Email = "a@mail.ru", Login = "a"});
+            _fakeUserRepository.Setup(repository => repository.GetUser(UserConstValues.UserId1))
+                .ReturnsAsync(UserConstValues.CorrectUser);
+            
             await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = "RUB"
+                    UserId = UserConstValues.UserId1, 
+                    Balance = BankAccountConstValues.CorrectBalance, 
+                    Currency = currency
                 });
-            await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = "USD"
-                });
-            await _bankAccountValidator.ValidateAndThrowAsync(new BankAccount{
-                    UserId = 2, Balance = 1000, Currency = "EUR"});
         }
+        
     }
 }

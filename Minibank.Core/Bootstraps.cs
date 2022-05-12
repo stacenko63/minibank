@@ -14,6 +14,7 @@ namespace Minibank.Core
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IBankAccountService, BankAccountService>();
             services.AddScoped<IMoneyTransferHistoryService, MoneyTransferHistoryService>();
+            
             services.AddScoped<ICurrencyConverter, CurrencyConverter>();
             services.AddFluentValidation().AddValidatorsFromAssembly(typeof(UserService).Assembly);
             return services;

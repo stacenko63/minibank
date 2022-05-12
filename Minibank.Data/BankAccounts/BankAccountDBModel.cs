@@ -21,6 +21,6 @@ namespace Minibank.Data.BankAccounts
         [Column("open_account_date")]
         public DateTime OpenAccountDate { get; set; }
         [Column("close_account_date")]
-        public DateTime CloseAccountDate { get; set; }
+        public DateTime? CloseAccountDate { get; set; }
     }
 }

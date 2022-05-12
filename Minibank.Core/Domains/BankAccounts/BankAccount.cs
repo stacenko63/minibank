@@ -11,7 +11,7 @@ namespace Minibank.Core.Domains.BankAccounts
         public string Currency { get; set; }
         public bool IsOpen { get; set; }
         public DateTime OpenAccountDate { get; set; }
-        public DateTime CloseAccountDate { get; set; }
+        public DateTime? CloseAccountDate { get; set; }
         
     }
 }

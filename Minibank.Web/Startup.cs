@@ -35,10 +35,12 @@ namespace Minibank.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Minibank.Web", Version = "v1"});
             });
+            
             services.AddScoped<IDatabase, Database>();
             services.AddData(Configuration);
             services.AddCore();

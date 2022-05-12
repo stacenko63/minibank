@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -7,8 +8,10 @@ using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Domains.Users.Validators;
+using Minibank.Core.Tests.Tests.Users;
 using Moq;
 using Xunit;
+using Messages = Minibank.Core.Domains.Users.Validators.Messages;
 
 namespace Minibank.Core.Tests.Users
 {
@@ -21,41 +24,54 @@ namespace Minibank.Core.Tests.Users
         public UserValidatorTests()
         {
             _fakeUserRepository = new Mock<IUserRepository>();
-            _userValidator = new UserValidator(_fakeUserRepository.Object);
+            _userValidator = new UserValidator();
         }
 
         [Fact]
         public async Task UserValidator_EmptyLogin_ShouldThrowValidationException()
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "", Email = "a@mail.ru"}));
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "", 
+                    Email = ConstValues.CorrectEmail
+                }));  
+            
+            Assert.Contains(Messages.EmptyLogin, exception.Message);
         }
         
-        [Fact]
-        public async Task UserValidator_LoginWithSpaces_ShouldThrowValidationException()
+        [Theory]
+        [InlineData("  ")]
+        [InlineData(" viktor")]
+        [InlineData("viktor ")]
+        [InlineData(" viktor ")]
+        [InlineData("s s")]
+        
+        public async Task UserValidator_LoginWithSpaces_ShouldThrowValidationException(string login)
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "  ", Email = "a@mail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = " viktor", Email = "a@mail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "viktor ", Email = "a@mail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = " viktor ", Email = "a@mail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "s s", Email = "a@mail.ru"}));
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = login, 
+                    Email = ConstValues.CorrectEmail
+                }));
+            
+            Assert.Contains(Messages.LoginWithSpaces, exception.Message);
         }
         
         [Fact]
         public async Task UserValidator_LoginWithLengthMoreThan20_ShouldThrowValidationException()
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "dddddddddddddddddddddddddddddddddddddddddddddddddddd", 
-                    Email = "a@mail.ru"}));
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userValidator.ValidateAndThrowAsync(new User {
+                    Login = "dddddddddddddddddddddddddddddddddddddddddddddddddddd", 
+                    Email = ConstValues.CorrectEmail}));
+            
+            Assert.Contains(Messages.LoginWithLengthMoreThan20, exception.Message);
         }
         
         [Theory]
-        [InlineData(32, 48)]
+        [InlineData(33, 48)]
         [InlineData(58, 65)]
         [InlineData(91, 97)]
         [InlineData(123, 256)]
@@ -63,23 +79,34 @@ namespace Minibank.Core.Tests.Users
         {
             for (int i = begin; i < end; i++)
             {
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = (char) i + "GG", Email = "a@mail.ru"}));
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i + "GG", Email = "a@mail.ru"}));
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i, Email = "a@mail.ru"}));
+                var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = (char) i + "GG", 
+                        Email = ConstValues.CorrectEmail
+                    }));
+                Assert.Contains(Messages.LoginFormat, exception.Message);
+                
+                
+                exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = "GG" + (char) i + "GG", 
+                        Email = ConstValues.CorrectEmail
+                    }));
+                Assert.Contains(Messages.LoginFormat, exception.Message);
+                
+                
+                exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = "GG" + (char) i, 
+                        Email = ConstValues.CorrectEmail
+                    }));
+                Assert.Contains(Messages.LoginFormat, exception.Message);
             }
         }
-        
-        [Fact]
-        public async Task UserValidator_LoginWhichHasAlreadyInBase_ShouldThrowValidationException()
-        {
-            _fakeUserRepository.Setup(repository => repository.ContainsLogin("Viktor").Result).Returns(true);
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a@mail.ru"}));
-        }
-        
+
         [Theory]
         [InlineData(48,58)]
         [InlineData(65,91)]
@@ -88,9 +115,23 @@ namespace Minibank.Core.Tests.Users
         {
             for (int i = begin; i < end; i++)
             {
-                await _userValidator.ValidateAndThrowAsync(new User {Login = (char) i + "GG", Email = "a@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i + "GG", Email = "a@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "GG" + (char) i, Email = "a@mail.ru"});
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = (char) i + "GG", 
+                    Email = ConstValues.CorrectEmail
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "GG" + (char) i + "GG", 
+                    Email = ConstValues.CorrectEmail
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = "GG" + (char) i, 
+                    Email = ConstValues.CorrectEmail
+                });
             }
         }
         
@@ -98,27 +139,36 @@ namespace Minibank.Core.Tests.Users
         [Fact]
         public async Task UserValidator_EmptyEmail_ShouldThrowValidationException()
         {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = ""}));
-        }
-        
-        [Fact]
-        public async Task UserValidator_EmailWithSpaces_ShouldThrowValidationException()
-        {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "  "}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = " a@mail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a@mail.ru "}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = " a@mail.ru "}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a t@mail.ru"}));
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = ""
+                }));
+            
+            Assert.Contains(Messages.EmptyEmail, exception.Message);
         }
         
         [Theory]
-        [InlineData(32, 46)]
+        [InlineData("  ")]
+        [InlineData(" a@mail.ru")]
+        [InlineData("a@mail.ru ")]
+        [InlineData(" a@mail.ru ")]
+        [InlineData("a t@mail.ru")]
+        public async Task UserValidator_EmailWithSpaces_ShouldThrowValidationException(string email)
+        {
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = email
+                }));
+            
+            Assert.Contains(Messages.EmailWithSpaces, exception.Message);
+        }
+        
+        [Theory]
+        [InlineData(33, 46)]
         [InlineData(47, 48)]
         [InlineData(58, 64)]
         [InlineData(91, 97)]
@@ -127,43 +177,62 @@ namespace Minibank.Core.Tests.Users
         {
             for (int i = begin; i < end; i++)
             {
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = (char) i + "a@mail.ru"}));
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a" + (char) i + "gg@mail.ru"}));
-                await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                    _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a" + (char) i + "@mail.ru"}));
+                var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin, 
+                        Email = (char) i + "a@mail.ru"
+                    }));
+                Assert.Contains(Messages.EmailFormat, exception.Message);
+                
+                
+                exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin, 
+                        Email = "a" + (char) i + "gg@mail.ru"
+                    }));
+                Assert.Contains(Messages.EmailFormat, exception.Message);
+
+
+                exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                    _userValidator.ValidateAndThrowAsync(new User
+                    {
+                        Login = ConstValues.CorrectLogin,
+                        Email = "a" + (char) i + "@mail.ru"
+                    }));
+                Assert.Contains(Messages.EmailFormat, exception.Message);
             }
         }
 
-        [Fact]
-        public async Task UserValidator_EmailWhichHasAlreadyInBase_ShouldThrowValidationException()
+        [Theory]
+        [InlineData("amail.ru")]
+        [InlineData("a@mal.ru")]
+        [InlineData("a@mil.ru")]
+        [InlineData("a@mai.ru")]
+        [InlineData("a@mailru")]
+        [InlineData("a@mail")]
+        [InlineData("a@mail.u")]
+        [InlineData("a.ru")]
+        public async Task UserValidator_EmailNotMailRu_ShouldThrowValidationException(string email)
         {
-            _fakeUserRepository.Setup(repository => repository.ContainsEmail("a@mail.ru").Result).Returns(true);
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-                _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor", Email = "a@mail.ru"}));
+            var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => 
+                _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = email
+                }));
             
-        }
-        
-        [Fact]
-        public async Task UserValidator_EmailNotMailRu_ShouldThrowValidationException()
-        {
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "amail.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mal.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mil.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mai.ru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mailru"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mail"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a@mail.u"}));
-            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userValidator.ValidateAndThrowAsync(new User {Login = "GG", Email = "a.ru"}));
+            Assert.Contains(Messages.EmailNotMailRu, exception.Message);
         }
 
         [Fact]
         public async Task UserValidator_SuccessPath_ShouldBeCompleteSuccessfully()
         {
-            _fakeUserRepository.Setup(repository => repository.ContainsLogin("viktor").Result).Returns(false);
-            _fakeUserRepository.Setup(repository => repository.ContainsEmail("a@mail.ru").Result).Returns(false);
-            await _userValidator.ValidateAndThrowAsync(new User {Login = "viktor", Email = "a@mail.ru"});
+            _fakeUserRepository.Setup(repository => repository.ContainsLogin(ConstValues.CorrectLogin)).ReturnsAsync(false);
+            _fakeUserRepository.Setup(repository => repository.ContainsEmail(ConstValues.CorrectEmail)).ReturnsAsync(false);
+
+            await _userValidator.ValidateAndThrowAsync(ConstValues.CorrectUser);
         }
         
         [Theory]
@@ -174,9 +243,23 @@ namespace Minibank.Core.Tests.Users
         {
             for (int i = begin; i < end; i++)
             {
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor1", Email = (char) i + "a@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor2", Email = "a" + (char) i + "gg@mail.ru"});
-                await _userValidator.ValidateAndThrowAsync(new User {Login = "Viktor3", Email = "a" + (char) i + "@mail.ru"});
+                await _userValidator.ValidateAndThrowAsync(new User 
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = (char) i + "a@mail.ru"
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = "a" + (char) i + "gg@mail.ru"
+                });
+                
+                await _userValidator.ValidateAndThrowAsync(new User
+                {
+                    Login = ConstValues.CorrectLogin, 
+                    Email = "a" + (char) i + "@mail.ru"
+                });
             }
         }
         

@@ -20,7 +20,7 @@ namespace Minibank.Web.Middlewares
             {
                 await next(httpContext);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 httpContext.Response.StatusCode = 500;
                 await httpContext.Response.WriteAsJsonAsync(new {Message = "Внутренняя ошибка сервера!"});

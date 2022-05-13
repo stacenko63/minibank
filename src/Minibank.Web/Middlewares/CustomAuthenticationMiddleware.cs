@@ -1,11 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 
 namespace Minibank.Web.Middlewares
 {
+
+    public class JwtTokenContent
+    {
+        public int? exp { get; set; }
+    }
 
     public class CustomAuthenticationMiddleware
     {
@@ -19,23 +30,46 @@ namespace Minibank.Web.Middlewares
         public async Task Invoke(HttpContext httpContext)
         {
 
-            var token = await httpContext.GetTokenAsync("access_token");
+            var token = httpContext.Request.Headers[HeaderNames.Authorization];
 
-            if (token != null)
+            if (!StringValues.IsNullOrEmpty(token))
             {
-                var handler = new JwtSecurityTokenHandler();
+                
+                var tokenResult = token.ToString().Substring(7);
 
-                var jwtToken = handler.ReadJwtToken(token);
+                var payload = tokenResult.Split('.')[1];
 
-                var exp = jwtToken.Payload.Exp;
-
-                DateTime dateByExp = new DateTime(1970, 1, 1).AddSeconds((double) exp);
-
-                if (DateTime.UtcNow > dateByExp)
+                payload = payload.Replace('-', '+'); 
+                payload = payload.Replace('_', '/'); 
+                
+                switch (payload.Length % 4) 
                 {
-                    httpContext.Response.StatusCode = 403;
-                    await httpContext.Response.WriteAsJsonAsync(new {Message = "Expired token!"});
-                    return;
+                    case 0: break; 
+                    case 2: payload += "=="; break; 
+                    case 3: payload += "="; break; 
+                    default: throw new Exception();
+                }
+                
+                var converted = Convert.FromBase64String(payload);
+                
+                var jsonPayload = Encoding.UTF8.GetString(converted);
+                
+                var r = JsonSerializer.Deserialize<JwtTokenContent>(jsonPayload);
+                
+                var exp = r.exp;
+
+                if (exp != null)
+                {
+
+                    DateTime dateByExp = new DateTime(1970, 1, 1).AddSeconds((double) exp);
+
+                    if (DateTime.UtcNow > dateByExp)
+                    {
+                        httpContext.Response.StatusCode = 403;
+                        await httpContext.Response.WriteAsJsonAsync(new {Message = "Expired token!"});
+                        return;
+                    }
+
                 }
 
             }
